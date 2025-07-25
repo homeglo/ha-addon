@@ -72,6 +72,13 @@ $config = [
                         'yii\debug\*'
                     ]
                 ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => 'php://stderr',
+                    'levels' => ['error', 'warning'],
+                    'logVars' => [],
+                    'enableRotation' => false,
+                ],
             ],
         ],
         'urlManager' => [

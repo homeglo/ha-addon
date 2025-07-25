@@ -1,4 +1,1 @@
-# ha-addon
-HomeGlo Add-on for HomeAssistant
-
-1.4
+# HomeGlo Add-on for HomeAssistant

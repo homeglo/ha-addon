@@ -5,12 +5,10 @@ ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 ###############################
 FROM yiisoftware/yii2-php:8.2-fpm-nginx AS build
 
-# Nothing changes here except the base image
+# Copy app code and install dependencies
 WORKDIR /app
-COPY . /app
-RUN if [ -f composer.json ]; then \
-        composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader; \
-    fi
+COPY ./app /app
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 ################################
 # ----- Stage 2:  Runtime -----

@@ -162,6 +162,11 @@ use yii\helpers\Html;
                     <i class="fas fa-home fa-sm fa-fw mr-2 text-gray-400"></i>
                     Home Dashboard
                 </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/api/ha/sync/all">
+                    <i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Sync from Home Assistant
+                </a>
             </div>
         </li>
 
