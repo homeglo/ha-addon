@@ -10,5 +10,4 @@ arch:
   - armv7
   - i386
 startup: services
-ports:
-  9887/tcp: 9887
+ingress: true
