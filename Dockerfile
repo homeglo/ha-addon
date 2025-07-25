@@ -47,7 +47,7 @@ COPY --from=build /app /app
 COPY rootfs/ /
 
 RUN chmod +x /etc/services.d/*/run && \
-    chmod +x /etc/cont-init.d/*
+    if [ -d /etc/cont-init.d ]; then chmod +x /etc/cont-init.d/* || true; fi
 
 # Fix permissions expected by Yii
 RUN mkdir -p /app/app/runtime /app/app/web/assets && \
