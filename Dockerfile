@@ -46,10 +46,6 @@ COPY --from=build /app /app
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
 
-# Create nginx user and group (Alpine doesn't have them by default)
-RUN addgroup -g 82 -S nginx && \
-    adduser -u 82 -D -S -G nginx nginx
-
 RUN chmod +x /etc/services.d/*/run
 
 # Fix permissions expected by Yii
