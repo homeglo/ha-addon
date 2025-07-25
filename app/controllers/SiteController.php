@@ -63,8 +63,8 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        // Direct redirect to home ID 1 - no authentication needed for local setup
-        return $this->redirect(['/site/enter-home', 'id' => 1]);
+        // For Home Assistant ingress, go directly to enter-home without redirect
+        return $this->actionEnterHome(2);
     }
 
     public function actionEnterHome($id)
