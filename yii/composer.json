@@ -1,0 +1,92 @@
+{
+    "name": "yiisoft/yii2-app-basic",
+    "description": "Yii 2 Basic Project Template",
+    "keywords": ["yii2", "framework", "basic", "project template"],
+    "homepage": "http://www.yiiframework.com/",
+    "type": "project",
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/yiisoft/yii2/issues?state=open",
+        "forum": "http://www.yiiframework.com/forum/",
+        "wiki": "http://www.yiiframework.com/wiki/",
+        "irc": "irc://irc.freenode.net/yii",
+        "source": "https://github.com/yiisoft/yii2"
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.1.8",
+        "ext-json": "*",
+        "ext-intl": "*",
+        "ext-gd": "*",
+        "ext-curl":"*",
+        "yiisoft/yii2": "~2.0.14",
+        "yiisoft/yii2-bootstrap4": "~2.0.0",
+        "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
+        "clue/mdns-react": "*",
+        "guzzlehttp/guzzle": "*",
+        "sqmk/phue": "^1.7",
+        "vlucas/phpdotenv": "^5.4",
+        "sleiman/airtable-php": "^2.4",
+        "yiisoft/yii2-debug": "~2.1.0",
+        "yiisoft/yii2-gii": "~2.2.0",
+        "rmrevin/yii2-fontawesome": "^3.0.0",
+        "nxp/math-executor": "^2.3",
+        "hoaaah/yii2-startbootstrap-sb-admin-2-asset": "dev-master",
+        "kartik-v/yii2-widget-timepicker": "dev-master",
+        "yiisoft/yii2-queue": "^2.3",
+        "sentry/sdk": "^3.3",
+        "zumba/amplitude-php": "^1.0",
+        "amphp/websocket-client": "^2.0"
+    },
+    "require-dev": {
+        "yiisoft/yii2-faker": "~2.0.0",
+        "codeception/codeception": "^5.0",
+        "codeception/verify": "~0.5.0 || ~1.1.0",
+        "codeception/specify": "~2.0.0",
+        "codeception/module-filesystem": "^3.0.0",
+        "codeception/module-yii2": "^1.0.0",
+        "codeception/module-asserts": "^3.0.0"
+    },
+    "config": {
+        "process-timeout": 1800,
+        "fxp-asset": {
+            "enabled": false
+        },
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "php-http/discovery": true
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "yii\\composer\\Installer::postInstall",
+            "sh post-install-cmd.sh"
+        ],
+        "post-create-project-cmd": [
+            "yii\\composer\\Installer::postCreateProject",
+            "yii\\composer\\Installer::postInstall"
+        ]
+    },
+    "extra": {
+        "yii\\composer\\Installer::postCreateProject": {
+            "setPermission": [
+                {
+                    "runtime": "0777",
+                    "web/assets": "0777",
+                    "yii": "0755"
+                }
+            ]
+        },
+        "yii\\composer\\Installer::postInstall": {        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/tkijewski/yii2-startbootstrap-sb-admin-2-asset"
+        }
+    ]
+}

@@ -1,0 +1,56 @@
+<?php
+
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
+/** @var yii\web\View $this */
+/** @var app\models\HgHubSearch $model */
+/** @var yii\widgets\ActiveForm $form */
+?>
+
+<div class="hg-hub-search">
+
+    <?php $form = ActiveForm::begin([
+        'action' => ['index'],
+        'method' => 'get',
+        'options' => [
+            'data-pjax' => 1
+        ],
+    ]); ?>
+
+    <?= $form->field($model, 'id') ?>
+
+    <?= $form->field($model, 'created_at') ?>
+
+    <?= $form->field($model, 'updated_at') ?>
+
+    <?= $form->field($model, 'hg_home_id') ?>
+
+    <?= $form->field($model, 'hg_status_id') ?>
+
+    <?php // echo $form->field($model, 'display_name') ?>
+
+    <?php // echo $form->field($model, 'access_token') ?>
+
+    <?php // echo $form->field($model, 'bearer_token') ?>
+
+    <?php // echo $form->field($model, 'refresh_token') ?>
+
+    <?php // echo $form->field($model, 'token_expires_at') ?>
+
+    <?php // echo $form->field($model, 'hue_email') ?>
+
+    <?php // echo $form->field($model, 'hue_random') ?>
+
+    <?php // echo $form->field($model, 'notes') ?>
+
+    <?php // echo $form->field($model, 'metadata') ?>
+
+    <div class="form-group">
+        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
+        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+    </div>
+
+    <?php ActiveForm::end(); ?>
+
+</div>
