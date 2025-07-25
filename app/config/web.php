@@ -39,6 +39,10 @@ $config = [
             'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
             'scriptUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
         ],
+        'assetManager' => [
+            'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] . '/assets' : '/assets',
+            'basePath' => '@webroot/assets',
+        ],
         'cache' => [
             'class' => 'yii\caching\DummyCache',
         ],
