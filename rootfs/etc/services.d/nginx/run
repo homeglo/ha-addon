@@ -1,4 +1,4 @@
 #!/usr/bin/with-contenv bashio
-echo "Checking /app/app/web directory:"
-ls -la /app/app/web/ | head -10
+echo "Checking /app/homeglo/web directory:"
+ls -la /app/homeglo/web/ | head -10
 exec nginx -g 'daemon off;'

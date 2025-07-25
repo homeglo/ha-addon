@@ -41,7 +41,7 @@ RUN apk add --no-cache \
         su-exec
 
 # Copy code from builder
-COPY --from=build /app /app/app
+COPY --from=build /app /app/homeglo
 
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
@@ -50,9 +50,9 @@ RUN chmod +x /etc/services.d/*/run && \
     if [ -d /etc/cont-init.d ]; then chmod +x /etc/cont-init.d/* || true; fi
 
 # Fix permissions expected by Yii
-RUN mkdir -p /app/app/runtime /app/app/web/assets && \
-    chmod -R 777 /app/app/runtime && \
-    chmod -R 777 /app/app/web/assets
+RUN mkdir -p /app/homeglo/runtime /app/homeglo/web/assets && \
+    chmod -R 777 /app/homeglo/runtime && \
+    chmod -R 777 /app/homeglo/web/assets
 
 RUN nginx -t
 

@@ -2,11 +2,11 @@
 # Run database migrations on startup
 
 bashio::log.info "Preparing database..."
-cd /app/app
+cd /app/homeglo
 
 # Create runtime directory if it doesn't exist
-mkdir -p /app/app/runtime
-chmod -R 777 /app/app/runtime
+mkdir -p /app/homeglo/runtime
+chmod -R 777 /app/homeglo/runtime
 
 # Ensure /data directory exists (Home Assistant persistent storage)
 mkdir -p /data
