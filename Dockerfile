@@ -41,7 +41,7 @@ RUN apk add --no-cache \
         su-exec
 
 # Copy code from builder
-COPY --from=build /app /app
+COPY --from=build /app /app/app
 
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
