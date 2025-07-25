@@ -37,7 +37,7 @@ $config = [
             'cookieValidationKey' => 'eHmld8OgQ_8GVtOZ2AxARojaFflmQOzu',
             // Handle Home Assistant ingress
             'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
-            'scriptUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
+            'scriptUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] . '/index.php' : '',
         ],
         'assetManager' => [
             'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] . '/assets' : '/assets',
