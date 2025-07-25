@@ -46,7 +46,8 @@ COPY --from=build /app /app
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
 
-RUN chmod +x /etc/services.d/*/run
+RUN chmod +x /etc/services.d/*/run && \
+    chmod +x /etc/cont-init.d/*
 
 # Fix permissions expected by Yii
 RUN mkdir -p /app/app/runtime /app/app/web/assets && \
