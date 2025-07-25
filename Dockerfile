@@ -45,15 +45,15 @@ RUN apk add --no-cache \
 # Copy code from builder
 COPY --from=build /app /app
 
-# Fix permissions expected by Yii
-RUN mkdir -p /app/runtime && \
-    chmod -R 775 /app/runtime
-
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
 
 RUN chmod +x /etc/services.d/*/run
-RUN chmod -R 777 /app/app/runtime
+
+# Fix permissions expected by Yii
+RUN mkdir -p /app/app/runtime /app/app/web/assets && \
+    chmod -R 777 /app/app/runtime && \
+    chmod -R 777 /app/app/web/assets
 
 RUN nginx -t
 
