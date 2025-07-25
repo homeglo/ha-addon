@@ -11,3 +11,4 @@ arch:
   - i386
 startup: services
 ingress: true
+ingress_port: 80
