@@ -35,6 +35,9 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'eHmld8OgQ_8GVtOZ2AxARojaFflmQOzu',
+            // Handle Home Assistant ingress
+            'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
+            'scriptUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
         ],
         'cache' => [
             'class' => 'yii\caching\DummyCache',
@@ -94,14 +97,14 @@ if (1==1) {
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        'allowedIPs' => ['::1'],
+        'allowedIPs' => ['*'],
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        'allowedIPs' => ['::1'],
+        'allowedIPs' => ['*'],
     ];
 }
 
