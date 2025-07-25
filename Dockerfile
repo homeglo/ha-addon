@@ -27,6 +27,17 @@ RUN apk add --no-cache \
         php82-opcache \
         php82-cli \
         php82-sockets \
+        php82-mbstring \
+        php82-dom \
+        php82-xml \
+        php82-ctype \
+        php82-json \
+        php82-tokenizer \
+        php82-fileinfo \
+        php82-openssl \
+        php82-curl \
+        php82-iconv \
+        php82-phar \
         sqlite \
         tzdata \
         su-exec
