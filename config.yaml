@@ -1,0 +1,14 @@
+name: "HomeGlo"
+description: "Right light, right time"
+version: "1.0.0"
+slug: "homeglo"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: services
+ports:
+  9887/tcp: 9887
