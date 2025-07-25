@@ -37,10 +37,23 @@ if [ ! -f "yii" ]; then
     exit 1
 fi
 
+# Check which PHP command is available
+PHP_CMD=""
+if command -v php82 >/dev/null 2>&1; then
+    PHP_CMD="php82"
+    bashio::log.info "Using php82 command"
+elif command -v php >/dev/null 2>&1; then
+    PHP_CMD="php"
+    bashio::log.info "Using php command"
+else
+    bashio::log.error "No PHP command found!"
+    exit 1
+fi
+
 # Run migrations
-bashio::log.info "Running database migrations..."
+bashio::log.info "Running database migrations with $PHP_CMD..."
 bashio::log.info "Migration command output:"
-php yii migrate --interactive=0 2>&1 || {
+$PHP_CMD yii migrate --interactive=0 2>&1 || {
     bashio::log.error "Migration failed, but continuing startup..."
     bashio::log.error "Error code: $?"
 }
