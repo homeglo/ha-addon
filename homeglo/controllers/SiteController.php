@@ -72,6 +72,14 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        // Check display mode
+        $displayMode = \app\helpers\IngressHelper::getDisplayMode();
+        
+        // If in standalone mode without ingress, show standalone page
+        if ($displayMode === 'standalone' || $displayMode === 'standalone-ha') {
+            return $this->render('standalone', ['mode' => $displayMode]);
+        }
+        
         // Check if default home (ID 2) exists, create it if not
         $defaultHome = HgHome::findOne(2);
         

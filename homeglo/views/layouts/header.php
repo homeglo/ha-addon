@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Html;
 use app\helpers\AddonHelper;
+use app\helpers\IngressHelper;
 
 /* (C) Copyright 2019 Heru Arief Wijaya (http://belajararief.com/) untuk Indonesia.*/
 
@@ -163,24 +164,39 @@ use app\helpers\AddonHelper;
         <div class="topbar-divider d-none d-sm-block"></div>
         <!-- Nav Item - User Information -->
         <li class="nav-item dropdown no-arrow">
-            <!-- Local Home Assistant Setup - Always show navigation -->
+            <?php 
+            $displayMode = IngressHelper::getDisplayMode();
+            $userLabel = $displayMode === 'ingress' ? 'HA User' : 
+                        ($displayMode === 'standalone-ha' ? 'Local HA' : 'Local User');
+            ?>
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Local User</span>
-                <img class="img-profile rounded-circle" src="/images/logo-small.png">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?= Html::encode($userLabel) ?></span>
+                <img class="img-profile rounded-circle" src="<?= IngressHelper::getBaseUrl() ?>/images/logo-small.png">
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="/site/enter-home/2">
+                <a class="dropdown-item" href="<?= IngressHelper::createUrl(['/site/enter-home', 'id' => 2]) ?>">
                     <i class="fas fa-home fa-sm fa-fw mr-2 text-gray-400"></i>
                     Home Dashboard
                 </a>
+                
+                <?php if ($displayMode !== 'standalone'): ?>
                 <div class="dropdown-divider"></div>
-                <?= Html::beginForm(['/api/ha/sync/all'], 'post'); ?>
+                <?= Html::beginForm(IngressHelper::createUrl(['/api/ha/sync/all']), 'post'); ?>
                     <?= Html::submitButton(
                         '<i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i> Sync from Home Assistant',
                         ['class' => 'dropdown-item', 'encode' => false]
                     ); ?>
                 <?= Html::endForm(); ?>
+                <?php endif; ?>
+                
+                <?php if ($displayMode === 'standalone' || $displayMode === 'standalone-ha'): ?>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item-text text-muted small">
+                    <i class="fas fa-info-circle fa-sm fa-fw mr-2"></i>
+                    Mode: <?= Html::encode(ucfirst(str_replace('-', ' ', $displayMode))) ?>
+                </div>
+                <?php endif; ?>
             </div>
         </li>
 

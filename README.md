@@ -9,7 +9,6 @@ docker run --rm -it --name builder --privileged \
   -t /data \
   --test \
   --aarch64 \
-  --no-cache \
   -i homeglo-aarch64 \
   -d local
 ```
