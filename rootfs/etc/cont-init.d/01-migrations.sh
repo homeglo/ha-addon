@@ -30,9 +30,9 @@ fi
 
 # Check which PHP command is available
 PHP_CMD=""
-if command -v php82 >/dev/null 2>&1; then
-    PHP_CMD="php82"
-    bashio::log.info "Using php82 command"
+if command -v php83 >/dev/null 2>&1; then
+    PHP_CMD="php83"
+    bashio::log.info "Using php83 command"
 elif command -v php >/dev/null 2>&1; then
     PHP_CMD="php"
     bashio::log.info "Using php command"

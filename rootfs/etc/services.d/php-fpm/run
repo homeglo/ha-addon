@@ -1,2 +1,2 @@
 #!/usr/bin/with-contenv bashio
-exec php-fpm82 -F
+exec php-fpm83 -F
