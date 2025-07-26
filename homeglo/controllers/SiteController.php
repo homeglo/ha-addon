@@ -63,6 +63,9 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        if (!HgHome::findOne(2)) {
+            return $this->redirect(['/hg-home/create']);
+        }
         // For Home Assistant ingress, go directly to enter-home without redirect
         return $this->actionEnterHome(1);
     }
@@ -70,8 +73,7 @@ class SiteController extends Controller
     public function actionEnterHome($id)
     {
         $home = HgHome::findOne($id);
-
-        return $this->redirect('hg-glo/index',['hg_glozone_id'=>1]);
+        $hubs = HgHub::find()->where(['hg_home_id'=>$id])->all();
 
         Yii::$app->session->set('home_record',$home);
 
