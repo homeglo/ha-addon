@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bashio
 
 # Detect if we're in addon mode or standalone mode
-if [[ -n "$SUPERVISOR_TOKEN" ]]; then
+if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
     # Addon mode - export supervisor token and URLs
     export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
     export HA_TOKEN="${SUPERVISOR_TOKEN}"
