@@ -75,4 +75,19 @@ else
     bashio::log.warning "Database file not found after migrations"
 fi
 
+# Test database write access
+bashio::log.info "Testing database write access..."
+export DB_PATH="/data/database.sqlite"
+$PHP_CMD -r "
+try {
+    \$pdo = new PDO('sqlite:$DB_PATH');
+    \$pdo->exec('CREATE TABLE IF NOT EXISTS test_write (id INTEGER)');
+    \$pdo->exec('INSERT INTO test_write (id) VALUES (1)');
+    \$pdo->exec('DROP TABLE test_write');
+    echo 'Database write test: SUCCESS\n';
+} catch (Exception \$e) {
+    echo 'Database write test FAILED: ' . \$e->getMessage() . '\n';
+}
+" 2>&1
+
 bashio::log.info "=== MIGRATION SCRIPT COMPLETED ==="
