@@ -53,6 +53,13 @@ class HomeAssistantSyncService extends Component
      */
     private function log($message, $level = 'info')
     {
+        // Ensure message is a string to avoid array to string conversion errors
+        if (is_array($message) || is_object($message)) {
+            $message = json_encode($message, JSON_PRETTY_PRINT);
+        } else {
+            $message = (string)$message;
+        }
+        
         if ($this->logger && is_callable($this->logger)) {
             call_user_func($this->logger, $message, $level);
         } else {
@@ -84,7 +91,8 @@ class HomeAssistantSyncService extends Component
         try {
             return $this->homeAssistant->testConnection();
         } catch (\Exception $e) {
-            $this->log("Connection test failed: " . $e->getMessage(), 'error');
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $this->log("Connection test failed: " . $errorMsg, 'error');
             return false;
         }
     }
@@ -253,7 +261,8 @@ class HomeAssistantSyncService extends Component
             }
 
         } catch (\Exception $e) {
-            $this->log("Location sync failed: " . $e->getMessage(), 'error');
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $this->log("Location sync failed: " . $errorMsg, 'error');
             throw $e;
         }
     }
@@ -279,8 +288,10 @@ class HomeAssistantSyncService extends Component
             $results['location'] = $this->syncLocationData();
             $this->log("Location sync completed successfully");
         } catch (\Exception $e) {
-            $results['errors'][] = "Location sync failed: " . $e->getMessage();
-            $this->log("Location sync failed: " . $e->getMessage(), 'error');
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $results['errors'][] = "Location sync failed: " . $errorMsg;
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $this->log("Location sync failed: " . $errorMsg, 'error');
         }
 
 
@@ -289,8 +300,9 @@ class HomeAssistantSyncService extends Component
             $results['devices'] = $this->syncDevices($deviceTypeFilter);
             $this->log("Device sync completed successfully");
         } catch (\Exception $e) {
-            $results['errors'][] = "Device sync failed: " . $e->getMessage();
-            $this->log("Device sync failed: " . $e->getMessage(), 'error');
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $results['errors'][] = "Device sync failed: " . $errorMsg;
+            $this->log("Device sync failed: " . $errorMsg, 'error');
         }
 
         $results['success'] = empty($results['errors']);
@@ -516,7 +528,8 @@ class HomeAssistantSyncService extends Component
             }
 
         } catch (\Exception $e) {
-            $this->log("  ✗ Failed to get area info: " . $e->getMessage(), 'error');
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $this->log("  ✗ Failed to get area info: " . $errorMsg, 'error');
             return null;
         }
     }
@@ -1003,7 +1016,8 @@ class HomeAssistantSyncService extends Component
             return $unknownLightEntities;
             
         } catch (\Exception $e) {
-            $this->log("Failed to check for unknown light entities: " . $e->getMessage(), 'error');
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            $this->log("Failed to check for unknown light entities: " . $errorMsg, 'error');
             return [];
         }
     }

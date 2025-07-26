@@ -73,10 +73,11 @@ class HomeAssistantController extends Controller
             ];
             
         } catch (\Exception $e) {
-            Yii::error("HA Connection Test Error: " . $e->getMessage(), __METHOD__);
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            Yii::error("HA Connection Test Error: " . $errorMsg, __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Connection test failed: ' . $e->getMessage(),
+                'message' => 'Connection test failed: ' . $errorMsg,
                 'debug' => $debugInfo
             ];
         }
@@ -104,10 +105,11 @@ class HomeAssistantController extends Controller
             ];
             
         } catch (\Exception $e) {
-            Yii::error("HA Device Sync Error: " . $e->getMessage(), __METHOD__);
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            Yii::error("HA Device Sync Error: " . $errorMsg, __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Device sync failed: ' . $e->getMessage()
+                'message' => 'Device sync failed: ' . $errorMsg
             ];
         }
     }
@@ -134,10 +136,11 @@ class HomeAssistantController extends Controller
             ];
             
         } catch (\Exception $e) {
-            Yii::error("HA Location Sync Error: " . $e->getMessage(), __METHOD__);
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            Yii::error("HA Location Sync Error: " . $errorMsg, __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Location sync failed: ' . $e->getMessage()
+                'message' => 'Location sync failed: ' . $errorMsg
             ];
         }
     }
@@ -164,10 +167,11 @@ class HomeAssistantController extends Controller
             ];
             
         } catch (\Exception $e) {
-            Yii::error("HA Complete Sync Error: " . $e->getMessage(), __METHOD__);
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            Yii::error("HA Complete Sync Error: " . $errorMsg, __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Complete sync failed: ' . $e->getMessage()
+                'message' => 'Complete sync failed: ' . $errorMsg
             ];
         }
     }
@@ -219,10 +223,11 @@ class HomeAssistantController extends Controller
             ];
             
         } catch (\Exception $e) {
-            Yii::error("HA Status Error: " . $e->getMessage(), __METHOD__);
+            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
+            Yii::error("HA Status Error: " . $errorMsg, __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Failed to get sync status: ' . $e->getMessage()
+                'message' => 'Failed to get sync status: ' . $errorMsg
             ];
         }
     }
@@ -283,9 +288,6 @@ class HomeAssistantController extends Controller
                 }
             }
             
-            // Get hubs for home 2
-            $hubs = HgHub::find()->where(['hg_home_id' => 2])->all();
-            
             return [
                 'success' => true,
                 'home2' => [
@@ -298,8 +300,7 @@ class HomeAssistantController extends Controller
                             'name' => $g->display_name,
                             'home_id' => $g->hg_home_id
                         ];
-                    }, $deviceGroups),
-                    'hubs_count' => count($hubs)
+                    }, $deviceGroups)
                 ],
                 'lights' => [
                     'total' => count($allLights),
