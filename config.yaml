@@ -1,6 +1,6 @@
 name: "HomeGlo"
 description: "Right light, right time"
-version: "1.0.80"
+version: "1.0.81"
 slug: "homeglo"
 init: false
 arch:

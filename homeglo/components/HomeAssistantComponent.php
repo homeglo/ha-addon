@@ -146,22 +146,33 @@ class HomeAssistantComponent extends Component
             $this->log("Connecting to Home Assistant at: {$this->homeAssistantUrl}");
             $this->log("Using token: " . (empty($this->accessToken) ? 'EMPTY' : substr($this->accessToken, 0, 10) . '...'));
             
-            /** @var WebsocketConnection $connection */
-            $connection = connect($this->homeAssistantUrl);
-            $this->log("✓ WebSocket connection established");
-
-            // Handle authentication
-            $message = $connection->receive();
-            $payload = $message->buffer();
-            $this->log("Auth message received: " . $payload);
-            $decoded = json_decode($payload, true);
-            
-            if (!$decoded || !isset($decoded['type'])) {
-                throw new Exception('Invalid response from Home Assistant');
+            try {
+                /** @var WebsocketConnection $connection */
+                $connection = connect($this->homeAssistantUrl);
+                $this->log("✓ WebSocket connection established");
+            } catch (\Throwable $connectError) {
+                $this->log("✗ WebSocket connection failed: " . $connectError->getMessage(), 'error');
+                $this->log("Connection error class: " . get_class($connectError), 'error');
+                throw new Exception("Failed to connect to WebSocket: " . $connectError->getMessage(), 0, $connectError);
             }
 
-            if ($decoded['type'] !== 'auth_required') {
-                throw new Exception('Expected auth_required message, got: ' . $decoded['type']);
+            // Handle authentication
+            try {
+                $message = $connection->receive();
+                $payload = $message->buffer();
+                $this->log("Auth message received: " . $payload);
+                $decoded = json_decode($payload, true);
+                
+                if (!$decoded || !isset($decoded['type'])) {
+                    throw new Exception('Invalid response from Home Assistant: ' . $payload);
+                }
+
+                if ($decoded['type'] !== 'auth_required') {
+                    throw new Exception('Expected auth_required message, got: ' . $decoded['type'] . ' - ' . $payload);
+                }
+            } catch (\Throwable $authError) {
+                $this->log("✗ Auth handshake failed: " . $authError->getMessage(), 'error');
+                throw new Exception("Authentication handshake failed: " . $authError->getMessage(), 0, $authError);
             }
 
             // Send authentication
@@ -205,12 +216,26 @@ class HomeAssistantComponent extends Component
     public function testConnection()
     {
         try {
+            $this->log("Starting connection test...");
+            $this->log("URL: " . $this->homeAssistantUrl);
+            $this->log("Token present: " . (!empty($this->accessToken) ? 'Yes' : 'No'));
+            
             $connection = $this->createConnection();
             $connection->close();
             $this->log("✓ Connection test successful");
             return true;
-        } catch (\Exception $e) {
-            $this->log("✗ Connection test failed: " . $e->getMessage(), 'error');
+        } catch (\Throwable $e) {
+            $errorDetails = [
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine()
+            ];
+            $this->log("✗ Connection test failed: " . json_encode($errorDetails), 'error');
+            
+            // Log the full stack trace for debugging
+            $this->log("Stack trace: " . $e->getTraceAsString(), 'error');
+            
             return false;
         }
     }
