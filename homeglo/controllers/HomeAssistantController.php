@@ -175,11 +175,9 @@ class HomeAssistantController extends Controller
             ];
             
         } catch (\Exception $e) {
-            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
-            Yii::error("HA Complete Sync Error: " . $errorMsg, __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Complete sync failed: ' . $errorMsg
+                'message' => json_encode($e)
             ];
         }
     }
