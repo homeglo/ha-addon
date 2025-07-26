@@ -23,4 +23,11 @@ else
     echo "Warning: No supervisor token found"
 fi
 
+# Copy config.yaml to data directory for PHP access
+if [ -f /app/config.yaml ]; then
+    cp /app/config.yaml /data/addon-config.yaml
+    chmod 644 /data/addon-config.yaml
+    echo "Copied addon config to /data"
+fi
+
 echo "Home Assistant connection environment configured"
