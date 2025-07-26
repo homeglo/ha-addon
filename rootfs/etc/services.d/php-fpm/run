@@ -1,20 +1,2 @@
 #!/usr/bin/with-contenv bashio
-set -e
-
-##############################################################################
-# 1.  Spawn a one-shot logger *after* the master process is up
-##############################################################################
-(
-    # wait a moment for workers to fork
-    sleep 1
-    bashio::log.info "========= php-fpm user check ========="
-    ps -o user,group,cmd \
-        | grep -E '[p]hp.-fpm' \
-        | while read -r line; do bashio::log.info "$line"; done
-    bashio::log.info "======================================"
-) &
-
-##############################################################################
-# 2.  Hand control to php-fpm – single instance, foreground mode
-##############################################################################
 exec php-fpm83 -F
