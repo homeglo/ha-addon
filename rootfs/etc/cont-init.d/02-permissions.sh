@@ -10,11 +10,11 @@ mkdir -p /app/homeglo/runtime /app/homeglo/web/assets
 chown -R nginx:nginx /app/homeglo/runtime /app/homeglo/web/assets
 
 # Set permissions (make sure directories are writable)
-chmod -R 775 /app/homeglo/runtime /app/homeglo/web/assets
+chmod -R 777 /app/homeglo/runtime /app/homeglo/web/assets
 
 # Ensure parent directory is accessible
 chown nginx:nginx /app/homeglo/web
-chmod 755 /app/homeglo/web
+chmod 777 /app/homeglo/web
 
 # Verify permissions
 echo "Permissions after fix:"

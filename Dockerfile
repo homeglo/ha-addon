@@ -50,7 +50,7 @@ RUN set -e; \
     rm -rf /app/homeglo/runtime /app/homeglo/web/assets && \
     mkdir -p /app/homeglo/runtime /app/homeglo/web/assets && \
     chown -R nginx:nginx /app/homeglo/runtime /app/homeglo/web/assets && \
-    chmod -R 775 /app/homeglo/runtime /app/homeglo/web/assets && \
+    chmod -R 777 /app/homeglo/runtime /app/homeglo/web/assets && \
     # Ensure parent directories have correct permissions too
     chown nginx:nginx /app/homeglo/web && \
     chmod 755 /app/homeglo/web
