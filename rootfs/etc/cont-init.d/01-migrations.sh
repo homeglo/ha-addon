@@ -53,11 +53,11 @@ $PHP_CMD yii migrate --interactive=0 2>&1 || {
 if [ -f /data/database.sqlite ]; then
     bashio::log.info "Database file exists, checking current permissions:"
     ls -la /data/database.sqlite
-    bashio::log.info "Setting database file permissions and ownership..."
-    chmod 777 /data/database.sqlite
-    chown nginx:nginx /data/database.sqlite 2>/dev/null || chown 82:82 /data/database.sqlite 2>/dev/null || true
+    bashio::log.info "Setting permissions for entire /data directory (including journal files)..."
+    chmod -R 777 /data
+    chown -R nginx:nginx /data 2>/dev/null || chown -R 82:82 /data 2>/dev/null || true
     bashio::log.info "Permissions after chmod/chown:"
-    ls -la /data/database.sqlite
+    ls -la /data/
     bashio::log.info "Directory permissions for /data:"
     ls -ld /data/
 else
