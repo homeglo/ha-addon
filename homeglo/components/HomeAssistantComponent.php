@@ -45,18 +45,33 @@ class HomeAssistantComponent extends Component
         
         // Try to get WebSocket URL from environment if not set
         if (empty($this->homeAssistantUrl)) {
-            $envUrl = $_ENV['HA_WEBSOCKET_URL'] ?? null;
+            // Check multiple possible environment variables
+            $envUrl = $_ENV['HA_WEBSOCKET_URL'] ?? 
+                     getenv('HA_WEBSOCKET_URL') ?? 
+                     null;
+            
             if (!empty($envUrl)) {
                 $this->homeAssistantUrl = $envUrl;
             } else {
-                // Default fallback
-                $this->homeAssistantUrl = 'ws://homeassistant.local:8123/api/websocket';
+                // In addon environment, use supervisor endpoint
+                if (getenv('SUPERVISOR_TOKEN')) {
+                    $this->homeAssistantUrl = 'ws://supervisor/core/api/websocket';
+                } else {
+                    // Default fallback for development
+                    $this->homeAssistantUrl = 'ws://homeassistant.local:8123/api/websocket';
+                }
             }
         }
         
         // Try to get access token from environment if not set
         if (empty($this->accessToken)) {
-            $envToken = $_ENV['HA_TOKEN'] ?? null;
+            // Check multiple possible environment variables
+            $envToken = $_ENV['HA_TOKEN'] ?? 
+                       getenv('HA_TOKEN') ?? 
+                       $_ENV['SUPERVISOR_TOKEN'] ?? 
+                       getenv('SUPERVISOR_TOKEN') ?? 
+                       null;
+            
             if (!empty($envToken)) {
                 $this->accessToken = $envToken;
             }

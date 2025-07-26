@@ -40,20 +40,40 @@ class HomeAssistantController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         
+        // Debug environment
+        $debugInfo = [
+            'supervisor_token' => !empty(getenv('SUPERVISOR_TOKEN')),
+            'ha_token_env' => !empty(getenv('HA_TOKEN')),
+            'ha_websocket_url' => getenv('HA_WEBSOCKET_URL') ?: 'not set',
+            'ha_rest_url' => getenv('HA_REST_URL') ?: 'not set',
+            'env_file_exists' => file_exists('/app/homeglo/.env')
+        ];
+        
+        error_log("HA Connection Debug: " . json_encode($debugInfo));
+        
         try {
             $service = $this->createSyncService();
+            
+            // Log the HomeAssistantComponent config
+            $ha = new \app\components\HomeAssistantComponent();
+            error_log("HA Component URL: " . $ha->homeAssistantUrl);
+            error_log("HA Component Token Present: " . (!empty($ha->accessToken) ? 'Yes' : 'No'));
+            
             $connected = $service->testConnection();
             
             return [
                 'success' => $connected,
-                'message' => $connected ? 'Connection successful' : 'Connection failed'
+                'message' => $connected ? 'Connection successful' : 'Connection failed',
+                'debug' => $debugInfo,
+                'ha_url' => $ha->homeAssistantUrl
             ];
             
         } catch (\Exception $e) {
             Yii::error("HA Connection Test Error: " . $e->getMessage(), __METHOD__);
             return [
                 'success' => false,
-                'message' => 'Connection test failed: ' . $e->getMessage()
+                'message' => 'Connection test failed: ' . $e->getMessage(),
+                'debug' => $debugInfo
             ];
         }
     }

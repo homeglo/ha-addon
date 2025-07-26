@@ -1,6 +1,6 @@
 name: "HomeGlo"
 description: "Right light, right time"
-version: "1.0.66"
+version: "1.0.67"
 slug: "homeglo"
 init: false
 arch:
@@ -15,3 +15,5 @@ ingress_port: 80
 panel_icon: mdi:lightbulb
 map:
   - data:rw
+homeassistant_api: true
+auth_api: true
