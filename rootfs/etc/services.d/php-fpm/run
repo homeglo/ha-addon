@@ -13,17 +13,17 @@ else
     echo "PHP-FPM starting in STANDALONE mode"
     
     # Export any environment variables that might be set for standalone
-    if [[ -n "$HA_TOKEN" ]]; then
+    if [[ -n "${HA_TOKEN:-}" ]]; then
         export HA_TOKEN="${HA_TOKEN}"
         echo "Using HA_TOKEN from environment"
     fi
     
-    if [[ -n "$HA_ACCESS_TOKEN" ]]; then
+    if [[ -n "${HA_ACCESS_TOKEN:-}" ]]; then
         export HA_TOKEN="${HA_ACCESS_TOKEN}"
         echo "Using HA_ACCESS_TOKEN from environment"
     fi
     
-    if [[ -n "$HA_WEBSOCKET_URL" ]]; then
+    if [[ -n "${HA_WEBSOCKET_URL:-}" ]]; then
         export HA_WEBSOCKET_URL="${HA_WEBSOCKET_URL}"
         echo "Using HA_WEBSOCKET_URL: $HA_WEBSOCKET_URL"
     else
@@ -32,7 +32,7 @@ else
         echo "Using default WebSocket URL: $HA_WEBSOCKET_URL"
     fi
     
-    if [[ -n "$HA_REST_URL" ]]; then
+    if [[ -n "${HA_REST_URL:-}" ]]; then
         export HA_REST_URL="${HA_REST_URL}"
     else
         # Default for standalone mode
@@ -41,7 +41,7 @@ else
 fi
 
 echo "Final environment:"
-echo "  HA_TOKEN present: $([[ -n "$HA_TOKEN" ]] && echo "Yes" || echo "No")"
+echo "  HA_TOKEN present: $([[ -n "${HA_TOKEN:-}" ]] && echo "Yes" || echo "No")"
 echo "  HA_WEBSOCKET_URL: ${HA_WEBSOCKET_URL:-not set}"
 echo "  HA_REST_URL: ${HA_REST_URL:-not set}"
 

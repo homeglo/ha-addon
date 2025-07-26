@@ -22,9 +22,9 @@ else
     # Standalone mode - check for environment variables
     echo "Running in STANDALONE mode - no supervisor token"
     
-    if [[ -n "$HA_TOKEN" || -n "$HA_ACCESS_TOKEN" ]]; then
+    if [[ -n "${HA_TOKEN:-}" || -n "${HA_ACCESS_TOKEN:-}" ]]; then
         # Use provided environment variables
-        STANDALONE_TOKEN="${HA_TOKEN:-$HA_ACCESS_TOKEN}"
+        STANDALONE_TOKEN="${HA_TOKEN:-${HA_ACCESS_TOKEN:-}}"
         STANDALONE_WS_URL="${HA_WEBSOCKET_URL:-ws://homeassistant.local:8123/api/websocket}"
         STANDALONE_REST_URL="${HA_REST_URL:-http://homeassistant.local:8123/api}"
         
