@@ -1,6 +1,6 @@
 <?php
 // Handle both relative and absolute paths
-$envPath = $_ENV['DB_PATH'] ?? 'runtime/database.sqlite';
+$envPath = $_ENV['DB_PATH'] ?? '/data/database.sqlite';
 if (strpos($envPath, '/') === 0) {
     // Absolute path
     $dbPath = $envPath;
