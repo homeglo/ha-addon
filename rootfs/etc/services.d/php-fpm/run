@@ -1,2 +1,17 @@
 #!/usr/bin/with-contenv bashio
+set -e
+
+# ── 1. Start php-fpm in the background (-D = daemonise, -R = no chroot) ─────
+php-fpm83 -D -R
+sleep 1   # give workers a moment to spawn
+
+# ── 2. Log who php-fpm is running as ─────────────────────────────────────────
+bashio::log.info "========= php-fpm user check ========="
+printf '%-15s %-15s %s\n' "USER" "GROUP" "CMD" | bashio::log.info
+ps -o user:15,group:15,cmd \
+      | grep -E '[p]hp.-fpm' \
+      | while read -r line; do bashio::log.info "$line"; done
+bashio::log.info "======================================"
+
+# ── 3. Bring php-fpm back to the foreground so s6 can supervise it ──────────
 exec php-fpm83 -F
