@@ -7,7 +7,7 @@ FROM yiisoftware/yii2-php:8.2-fpm-nginx AS build
 
 # Copy app code and install dependencies
 WORKDIR /app
-COPY ./app /app
+COPY ./homeglo /app
 RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 ################################
@@ -41,7 +41,7 @@ RUN apk add --no-cache \
         su-exec
 
 # Copy code from builder
-COPY --from=build /app /app/homeglo
+COPY --from=build /homeglo /app/homeglo
 
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
@@ -53,6 +53,8 @@ RUN chmod +x /etc/services.d/*/run && \
 RUN mkdir -p /app/homeglo/runtime /app/homeglo/web/assets && \
     chmod -R 777 /app/homeglo/runtime && \
     chmod -R 777 /app/homeglo/web/assets
+
+RUN mkdir -p /data && chown -R 1000:1000 /data
 
 RUN nginx -t
 

@@ -7,17 +7,6 @@ bashio::log.info "Changing to /app/homeglo..."
 cd /app/homeglo
 bashio::log.info "New directory: $(pwd)"
 
-# Create runtime directory if it doesn't exist
-bashio::log.info "Creating runtime directory..."
-mkdir -p /app/homeglo/runtime
-chmod -R 777 /app/homeglo/runtime
-
-# Ensure /data directory exists (Home Assistant persistent storage)
-bashio::log.info "Setting up /data directory..."
-mkdir -p /data
-chmod 777 /data
-chown -R nginx:nginx /data 2>/dev/null || chown -R 82:82 /data 2>/dev/null || true
-
 # Create database file in /data if it doesn't exist
 if [ ! -f /data/database.sqlite ]; then
     bashio::log.info "Creating database file in /data..."
