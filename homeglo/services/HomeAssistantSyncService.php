@@ -478,7 +478,6 @@ class HomeAssistantSyncService extends Component
         }
 
         // Get area information from Home Assistant
-        try {
             $areas = $this->homeAssistant->getAreaRegistry();
             $areaInfo = null;
             
@@ -527,11 +526,7 @@ class HomeAssistantSyncService extends Component
                 return null;
             }
 
-        } catch (\Exception $e) {
-            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
-            $this->log("  ✗ Failed to get area info: " . $errorMsg, 'error');
-            return null;
-        }
+
     }
 
     /**
