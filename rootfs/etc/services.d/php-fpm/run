@@ -1,16 +1,12 @@
 #!/usr/bin/with-contenv bashio
 
-# Get supervisor token using bashio (same method as init script)
-TOKEN="$(bashio::var.json SUPERVISOR_TOKEN 2>/dev/null || echo '')"
+# Export supervisor token for PHP (let bashio handle the token extraction)
+export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
+export HA_TOKEN="${SUPERVISOR_TOKEN}"
+export HA_WEBSOCKET_URL="ws://supervisor/core/api/websocket"
+export HA_REST_URL="http://supervisor/core/api"
 
-if [[ -n "$TOKEN" ]]; then
-    export SUPERVISOR_TOKEN="${TOKEN}"
-    export HA_TOKEN="${TOKEN}"
-    export HA_WEBSOCKET_URL="ws://supervisor/core/api/websocket"
-    export HA_REST_URL="http://supervisor/core/api"
-    echo "Exported supervisor token to PHP environment"
-else
-    echo "Warning: No supervisor token found for PHP"
-fi
+echo "PHP-FPM starting with HA connection vars"
+echo "SUPERVISOR_TOKEN present: $([[ -n "$SUPERVISOR_TOKEN" ]] && echo "Yes" || echo "No")"
 
 exec php-fpm83 -F
