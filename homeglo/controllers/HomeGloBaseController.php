@@ -61,15 +61,15 @@ class HomeGloBaseController extends Controller
             $this->home_record = HgHome::findOne($home_record->id);
         } else {
             error_log("HomeGloBaseController::beforeAction - No home_record in session, auto-setting default home");
-            // Auto-setup default home (ID 1) for local Home Assistant setup
-            $defaultHome = HgHome::findOne(1);
+            // Auto-setup default home (ID 2) for local Home Assistant setup
+            $defaultHome = HgHome::findOne(2);
             if ($defaultHome) {
                 $this->home_record = $defaultHome;
                 Yii::$app->session->set('home_record', $defaultHome);
                 error_log("HomeGloBaseController::beforeAction - Set default home in session");
             } else {
-                error_log("HomeGloBaseController::beforeAction - Default home (ID 1) not found!");
-                Yii::$app->session->setFlash('error','Default home (ID 1) not found!');
+                error_log("HomeGloBaseController::beforeAction - Default home (ID 2) not found!");
+                Yii::$app->session->setFlash('error','Default home (ID 2) not found!');
             }
         }
 

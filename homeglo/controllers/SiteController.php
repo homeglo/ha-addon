@@ -70,9 +70,77 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        error_log("SiteController::actionIndex - This should not be called! Current URI: " . \Yii::$app->request->url);
-        error_log("SiteController::actionIndex - Redirecting to hg-home/index");
-        return $this->redirect(['hg-home/index']);
+        // Check if default home (ID 2) exists, create it if not
+        $defaultHome = HgHome::findOne(2);
+        
+        if (!$defaultHome) {
+            error_log("SiteController::actionIndex - Creating default home (ID 2)");
+            
+            // Get template home if it exists
+            $templateHome = HgHome::findOne(1);
+            
+            $defaultHome = new HgHome();
+            $defaultHome->id = 2;
+            $defaultHome->display_name = "My Home";
+            $defaultHome->name = "my_home";
+            $defaultHome->lat = 0.0;
+            $defaultHome->lng = 0.0;
+            
+            // Copy values from template if it exists
+            if ($templateHome) {
+                $defaultHome->lat = $templateHome->lat ?: 0.0;
+                $defaultHome->lng = $templateHome->lng ?: 0.0;
+                $defaultHome->hg_version_id = $templateHome->hg_version_id;
+                $defaultHome->hg_status_id = $templateHome->hg_status_id;
+            }
+            
+            if ($defaultHome->save(false)) {
+                error_log("SiteController::actionIndex - Default home created successfully");
+                
+                // Create default glozone
+                $templateGlozone = null;
+                if ($templateHome) {
+                    $templateGlozone = HgGlozone::find()->where(['hg_home_id' => 1])->one();
+                }
+                
+                // If no template glozone, use system default
+                if (!$templateGlozone && defined('\app\models\HgGlozone::HG_DEFAULT_GLOZONE')) {
+                    $templateGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
+                }
+                
+                if ($templateGlozone) {
+                    $glozone = new HgGlozone();
+                    $glozone->attributes = $templateGlozone->attributes;
+                    $glozone->id = null; // Clear ID
+                    $glozone->hg_home_id = 2;
+                    $glozone->display_name = "My Home Glozone";
+                    $glozone->save(false);
+                    error_log("SiteController::actionIndex - Default glozone created");
+                    
+                    // Copy time blocks from template
+                    $templateTimeBlocks = HgGlozoneTimeBlock::find()->where(['hg_glozone_id' => $templateGlozone->id])->all();
+                    foreach ($templateTimeBlocks as $templateBlock) {
+                        $timeBlock = new HgGlozoneTimeBlock();
+                        $timeBlock->attributes = $templateBlock->attributes;
+                        $timeBlock->id = null;
+                        $timeBlock->hg_glozone_id = $glozone->id;
+                        $timeBlock->save(false);
+                    }
+                }
+                
+                // Create default hub
+                $hub = new HgHub();
+                $hub->display_name = "My Home Hub";
+                $hub->hg_home_id = 2;
+                $hub->save(false);
+                error_log("SiteController::actionIndex - Default hub created");
+            } else {
+                error_log("SiteController::actionIndex - Failed to create default home: " . json_encode($defaultHome->getErrors()));
+            }
+        }
+        
+        // Redirect to home 2
+        return $this->redirect(['site/enter-home', 'id' => 2]);
     }
 
     public function actionEnterHome($id)
