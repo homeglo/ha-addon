@@ -478,15 +478,26 @@ class HomeAssistantSyncService extends Component
         }
 
         // Get area information from Home Assistant
+        try {
+            $this->log("  - Fetching area registry from Home Assistant...");
             $areas = $this->homeAssistant->getAreaRegistry();
+            $this->log("  - Got " . count($areas) . " areas from registry");
+            
             $areaInfo = null;
             
             foreach ($areas as $area) {
                 if ($area['area_id'] === $areaId) {
                     $areaInfo = $area;
+                    $this->log("  - Found area info: " . json_encode($areaInfo));
                     break;
                 }
             }
+        } catch (\Throwable $e) {
+            $this->log("  ✗ Exception while fetching areas: " . get_class($e) . " - " . $e->getMessage());
+            $this->log("  - File: " . $e->getFile() . ":" . $e->getLine());
+            $this->log("  - Trace: " . $e->getTraceAsString());
+            throw $e;
+        }
 
             if (!$areaInfo) {
                 $this->log("  - Area info not found for area_id: {$areaId}");

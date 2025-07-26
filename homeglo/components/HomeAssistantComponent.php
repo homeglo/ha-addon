@@ -118,6 +118,7 @@ class HomeAssistantComponent extends Component
             }
 
             $this->log("Connecting to Home Assistant at: {$this->homeAssistantUrl}");
+            $this->log("Using token: " . (empty($this->accessToken) ? 'EMPTY' : substr($this->accessToken, 0, 10) . '...'));
             
             /** @var WebsocketConnection $connection */
             $connection = connect($this->homeAssistantUrl);
@@ -126,6 +127,7 @@ class HomeAssistantComponent extends Component
             // Handle authentication
             $message = $connection->receive();
             $payload = $message->buffer();
+            $this->log("Auth message received: " . $payload);
             $decoded = json_decode($payload, true);
             
             if (!$decoded || !isset($decoded['type'])) {
@@ -141,12 +143,14 @@ class HomeAssistantComponent extends Component
                 'type' => 'auth',
                 'access_token' => $this->accessToken
             ]);
+            $this->log("Sending auth message with token");
             $connection->sendText($authMessage);
             $this->log("Sent authentication credentials");
 
             // Wait for auth response
             $authMessage = $connection->receive();
             $authPayload = $authMessage->buffer();
+            $this->log("Auth response received: " . $authPayload);
             $authDecoded = json_decode($authPayload, true);
             
             if (!$authDecoded || !isset($authDecoded['type'])) {
@@ -197,16 +201,34 @@ class HomeAssistantComponent extends Component
         $message['id'] = $this->messageId++;
         $messageJson = json_encode($message);
         
+        // Log full request for debugging
+        $this->log("WebSocket Request: " . json_encode($message, JSON_PRETTY_PRINT));
+        
         $connection->sendText($messageJson);
         $this->log("Sent message: {$message['type']} (ID: {$message['id']})");
 
         // Wait for response
         $responseMessage = $connection->receive();
         $responsePayload = $responseMessage->buffer();
+        
+        // Log raw response for debugging
+        $this->log("WebSocket Raw Response: " . substr($responsePayload, 0, 1000) . (strlen($responsePayload) > 1000 ? '...' : ''));
+        
         $responseDecoded = json_decode($responsePayload, true);
         
         if (!$responseDecoded) {
+            $this->log("Failed to decode JSON response. Raw: " . $responsePayload);
             throw new Exception('Invalid JSON response from Home Assistant');
+        }
+        
+        // Log decoded response for debugging
+        if (isset($responseDecoded['type']) && $responseDecoded['type'] === 'result') {
+            $resultSummary = isset($responseDecoded['result']) ? 
+                (is_array($responseDecoded['result']) ? 'Array with ' . count($responseDecoded['result']) . ' items' : 'Non-array result') : 
+                'No result';
+            $this->log("WebSocket Response: type={$responseDecoded['type']}, success=" . (isset($responseDecoded['success']) ? ($responseDecoded['success'] ? 'true' : 'false') : 'not set') . ", result={$resultSummary}");
+        } else {
+            $this->log("WebSocket Response: " . json_encode($responseDecoded, JSON_PRETTY_PRINT));
         }
 
         if (isset($responseDecoded['id']) && $responseDecoded['id'] !== $message['id']) {
