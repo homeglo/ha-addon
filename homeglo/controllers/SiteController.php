@@ -72,6 +72,14 @@ class SiteController extends Controller
     {
         error_log("SiteController::actionIndex - Current URI: " . \Yii::$app->request->url);
         error_log("SiteController::actionIndex - X-Ingress-Path: " . (isset($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : 'not set'));
+        error_log("SiteController::actionIndex - Path Info: " . \Yii::$app->request->pathInfo);
+        
+        // Check if we're already trying to go to hg-home
+        if (strpos(\Yii::$app->request->url, 'hg-home') !== false) {
+            error_log("SiteController::actionIndex - Already on hg-home route, showing error");
+            throw new \yii\web\NotFoundHttpException('The requested page does not exist.');
+        }
+        
         error_log("SiteController::actionIndex - Redirecting to hg-home/index");
         return $this->redirect(['hg-home/index']);
     }

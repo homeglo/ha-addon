@@ -12,6 +12,23 @@ error_reporting(E_ALL);
 if (!empty($_SERVER['HTTP_X_INGRESS_PATH'])) {
     $_SERVER['SCRIPT_NAME'] = $_SERVER['HTTP_X_INGRESS_PATH'] . '/index.php';
     $_SERVER['PHP_SELF'] = $_SERVER['SCRIPT_NAME'];
+    
+    // Extract PATH_INFO from REQUEST_URI for Yii routing
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    $ingressPath = $_SERVER['HTTP_X_INGRESS_PATH'];
+    
+    // Remove ingress path from request URI if it's there
+    if (strpos($requestUri, $ingressPath) === 0) {
+        $requestUri = substr($requestUri, strlen($ingressPath));
+    }
+    
+    // Remove /index.php if present
+    $requestUri = preg_replace('/^\/index\.php/', '', $requestUri);
+    
+    // Set PATH_INFO
+    $_SERVER['PATH_INFO'] = parse_url($requestUri, PHP_URL_PATH) ?: '';
+    
+    error_log("Fixed PATH_INFO: " . $_SERVER['PATH_INFO']);
 }
 
 require __DIR__ . '/../vendor/autoload.php';
