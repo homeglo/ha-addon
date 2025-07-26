@@ -58,4 +58,13 @@ $PHP_CMD yii migrate --interactive=0 2>&1 || {
     bashio::log.error "Error code: $?"
 }
 
+# Fix database permissions after migrations
+if [ -f /data/database.sqlite ]; then
+    bashio::log.info "Setting database file permissions to 777..."
+    chmod 777 /data/database.sqlite
+    bashio::log.info "Database permissions set"
+else
+    bashio::log.warning "Database file not found after migrations"
+fi
+
 bashio::log.info "=== MIGRATION SCRIPT COMPLETED ==="
