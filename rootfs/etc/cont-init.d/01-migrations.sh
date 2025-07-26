@@ -62,6 +62,3 @@ log "Verifying SQLite write access…"
   \$pdo->exec('DROP TABLE _test');
 "
 log 'Migration script completed OK'
-
-sed -i 's|^php_admin_value\[open_basedir\].*|php_admin_value[open_basedir] = \
-/var/www/:/tmp/:/data/|g' /etc/php83/php-fpm.d/www.conf
