@@ -1,82 +1,64 @@
-#!/usr/bin/with-contenv bashio
-# Run database migrations on startup
+#!/usr/bin/with-contenv bash
+# Runs Yii DB migrations exactly once per container start
 
-bashio::log.info "=== MIGRATION SCRIPT STARTING ==="
-bashio::log.info "Current directory: $(pwd)"
-bashio::log.info "Changing to /app/homeglo..."
-cd /app/homeglo
-bashio::log.info "New directory: $(pwd)"
+set -Eeuo pipefail
 
-# Create database file in /data if it doesn't exist
-if [ ! -f /data/database.sqlite ]; then
-    bashio::log.info "Creating database file in /data..."
-    touch /data/database.sqlite
-    chmod 777 /data/database.sqlite
-    chown nginx:nginx /data/database.sqlite 2>/dev/null || chown 82:82 /data/database.sqlite 2>/dev/null || true
+###############################################################################
+# Config - adjust if you change your image
+###############################################################################
+APP_DIR="/app/homeglo"
+DB_FILE="/data/database.sqlite"
+RUN_USER="nginx"          # php-fpm pool user (see php*-fpm.d/www.conf)
+
+###############################################################################
+# Helpers
+###############################################################################
+log()   { bashio::log.info  "$*"; }
+fatal() { bashio::log.error "$*"; exit 1; }
+
+###############################################################################
+# 1. Prep writable /data (volume is mounted *after* build, so do it here)
+###############################################################################
+install -d -o "$RUN_USER" -g "$RUN_USER" -m 775 /data
+
+###############################################################################
+# 2. Ensure SQLite file exists with safe perms
+###############################################################################
+if [[ ! -f "$DB_FILE" ]]; then
+  log "Creating fresh database at $DB_FILE"
+  install -o "$RUN_USER" -g "$RUN_USER" -m 660 /dev/null "$DB_FILE"
 else
-    bashio::log.info "Database file already exists in /data"
+  log "Database file already in place"
 fi
 
-# Set DB_PATH environment variable for Yii
-export DB_PATH="/data/database.sqlite"
-bashio::log.info "DB_PATH set to: $DB_PATH"
+export DB_PATH="$DB_FILE"
 
-# Check if yii command exists
-if [ ! -f "yii" ]; then
-    bashio::log.error "Yii command not found! Contents of /app/homeglo:"
-    ls -la /app/homeglo/
-    exit 1
-fi
+###############################################################################
+# 3. Find PHP binary once (8.3 first, else fallback)
+###############################################################################
+PHP_CMD=$(command -v php83 || command -v php) || fatal "No PHP CLI found"
 
-# Check which PHP command is available
-PHP_CMD=""
-if command -v php83 >/dev/null 2>&1; then
-    PHP_CMD="php83"
-    bashio::log.info "Using php83 command"
-elif command -v php >/dev/null 2>&1; then
-    PHP_CMD="php"
-    bashio::log.info "Using php command"
-else
-    bashio::log.error "No PHP command found!"
-    exit 1
-fi
+###############################################################################
+# 4. Run Yii migrations; bail hard if they fail
+###############################################################################
+cd "$APP_DIR" || fatal "Cannot cd to $APP_DIR"
+log "Running migrations with $(basename "$PHP_CMD")"
+"$PHP_CMD" yii migrate/up --interactive=0
 
-# Run migrations
-bashio::log.info "Running database migrations with $PHP_CMD..."
-bashio::log.info "Migration command output:"
-$PHP_CMD yii migrate --interactive=0 2>&1 || {
-    bashio::log.error "Migration failed, but continuing startup..."
-    bashio::log.error "Error code: $?"
-}
+###############################################################################
+# 5. Re-own everything under /data (WAL/SHM files may have appeared)
+###############################################################################
+chown -R "$RUN_USER":"$RUN_USER" /data
+chmod 660 "$DB_FILE"
 
-# Fix database permissions after migrations
-if [ -f /data/database.sqlite ]; then
-    bashio::log.info "Database file exists, checking current permissions:"
-    ls -la /data/database.sqlite
-    bashio::log.info "Setting permissions for entire /data directory (including journal files)..."
-    chmod -R 777 /data
-    chown -R nginx:nginx /data 2>/dev/null || chown -R 82:82 /data 2>/dev/null || true
-    bashio::log.info "Permissions after chmod/chown:"
-    ls -la /data/
-    bashio::log.info "Directory permissions for /data:"
-    ls -ld /data/
-else
-    bashio::log.warning "Database file not found after migrations"
-fi
-
-# Test database write access
-bashio::log.info "Testing database write access..."
-export DB_PATH="/data/database.sqlite"
-$PHP_CMD -r "
-try {
-    \$pdo = new PDO('sqlite:$DB_PATH');
-    \$pdo->exec('CREATE TABLE IF NOT EXISTS test_write (id INTEGER)');
-    \$pdo->exec('INSERT INTO test_write (id) VALUES (1)');
-    \$pdo->exec('DROP TABLE test_write');
-    echo 'Database write test: SUCCESS\n';
-} catch (Exception \$e) {
-    echo 'Database write test FAILED: ' . \$e->getMessage() . '\n';
-}
-" 2>&1
-
-bashio::log.info "=== MIGRATION SCRIPT COMPLETED ==="
+###############################################################################
+# 6. Smoke-test write access
+###############################################################################
+log "Verifying SQLite write access…"
+"$PHP_CMD" -r "
+  \$pdo=new PDO('sqlite:$DB_FILE');
+  \$pdo->exec('CREATE TABLE IF NOT EXISTS _test(id INTEGER)');
+  \$pdo->exec('INSERT INTO _test VALUES (1)');
+  \$pdo->exec('DROP TABLE _test');
+"
+log 'Migration script completed OK'

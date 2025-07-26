@@ -30,7 +30,7 @@ FROM ${BUILD_FROM}
 # ── 3. Install runtime packages only ────────────────────────────────────────
 RUN apk add --no-cache \
       nginx \
-      php83-fpm php83-opcache php83-session php83-sockets \
+      php83-cli php83-fpm php83-opcache php83-session php83-sockets \
       php83-intl php83-gd php83-pdo_sqlite \
       php83-mbstring php83-json php83-tokenizer php83-xml php83-ctype \
       php83-openssl php83-curl php83-iconv php83-dom php83-fileinfo \
