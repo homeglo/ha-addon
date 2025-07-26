@@ -46,9 +46,14 @@ RUN chmod +x /etc/services.d/*/run && \
 
 # ── 6. Fix runtime-writable paths ───────────────────────────────
 RUN set -e; \
+    # Remove existing directories if they exist to ensure clean permissions
+    rm -rf /app/homeglo/runtime /app/homeglo/web/assets && \
     mkdir -p /app/homeglo/runtime /app/homeglo/web/assets && \
     chown -R nginx:nginx /app/homeglo/runtime /app/homeglo/web/assets && \
-    chmod -R 775  /app/homeglo/runtime /app/homeglo/web/assets
+    chmod -R 775 /app/homeglo/runtime /app/homeglo/web/assets && \
+    # Ensure parent directories have correct permissions too
+    chown nginx:nginx /app/homeglo/web && \
+    chmod 755 /app/homeglo/web
 
 # ── 7. Sanity-check nginx config at build time (optional) ───────────────────
 RUN nginx -t
