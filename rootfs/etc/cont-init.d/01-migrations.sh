@@ -48,10 +48,20 @@ log "Running migrations with $(basename "$PHP_CMD")"
 ###############################################################################
 # 5. Re-own everything under /data (WAL/SHM files may have appeared)
 ###############################################################################
-chown -R "$RUN_USER":"$RUN_USER" /data
-chmod 664 "$DB_FILE"
-# Also ensure directory has proper permissions for web access
-chmod 775 /data
+# Get the actual nginx user/group IDs from system
+NGINX_UID=$(id -u nginx 2>/dev/null || echo "100")
+NGINX_GID=$(id -g nginx 2>/dev/null || echo "101") 
+
+log "Setting ownership to nginx user (UID:$NGINX_UID, GID:$NGINX_GID)"
+chown -R "$NGINX_UID":"$NGINX_GID" /data
+# Use more permissive permissions to ensure access
+chmod 666 "$DB_FILE" 
+chmod 777 /data
+log "Database file permissions set to 666, directory to 777"
+
+# Also make sure the nginx user can write to runtime directories
+chown -R "$NGINX_UID":"$NGINX_GID" /app/homeglo/runtime /app/homeglo/web/assets
+chmod -R 775 /app/homeglo/runtime /app/homeglo/web/assets
 
 ###############################################################################
 # 6. Smoke-test write access
