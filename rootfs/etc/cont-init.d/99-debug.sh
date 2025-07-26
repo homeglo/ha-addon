@@ -20,4 +20,8 @@ else
   bashio::log.info "Database NOT found in /data"
 fi
 
+su -s /bin/sh nginx -c 'sqlite3 /data/database.sqlite "PRAGMA quick_check;"' \
+  && bashio::log.info "SQLite smoke-test: OK" \
+  || bashio::log.error "SQLite smoke-test: FAILED for nginx user"
+
 bashio::log.info "===== END DEBUG SNAPSHOT ====="
