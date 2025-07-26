@@ -12,7 +12,7 @@ if [[ -n "$TOKEN" ]]; then
     cat > /data/ha-config.php <<EOF
 <?php
 // Home Assistant connection configuration
-define('HA_TOKEN', '${SUPERVISOR_TOKEN}');
+define('HA_TOKEN', '${TOKEN}');
 define('HA_WEBSOCKET_URL', 'ws://supervisor/core/api/websocket');
 define('HA_REST_URL', 'http://supervisor/core/api');
 EOF
