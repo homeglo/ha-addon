@@ -70,23 +70,11 @@ class SiteController extends Controller
     public function actionEnterHome($id)
     {
         $home = HgHome::findOne($id);
-        $hubs = HgHub::find()->where(['hg_home_id'=>$id])->all();
-        $hubArray = [];
-        foreach ($hubs as $h) {
-            $hubArray[$h->id] = $h;
-        }
+
+        return $this->redirect('hg-glo/index',['hg_glozone_id'=>1]);
 
         Yii::$app->session->set('home_record',$home);
-        Yii::$app->session->set('home_hubs',$hubArray);
 
-        foreach ($hubs as $h) {
-            if (empty($h->access_token)) {
-                Yii::$app->session->setFlash('error','Set up this hub!');
-                return $this->redirect(['/hg-hub']);
-            }
-        }
-
-        //return $this->redirect(['/site/dashboard','hg_home_id'=>$id]);
         return $this->redirect(['/hg-home/update','id'=>$id]);
     }
 
