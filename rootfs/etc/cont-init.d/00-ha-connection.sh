@@ -1,42 +1,48 @@
 #!/usr/bin/with-contenv bashio
 # 00-ha-connection.sh – prepare HA_* vars for downstream processes
-# Runs in /etc/cont-init.d (executed as root before services start)
+# Runs in /etc/cont-init.d (root, before services)
 
-set -e
-log(){ echo "[00-ha-connection] $*"; }
+set -e          # fail on command errors
+# DO NOT use `set -u` (nounset); s6-overlay containers often rely on unset vars
+
+log() { echo "[00-ha-connection] $*"; }
 
 # ---------------------------------------------------------------
-# Detect Supervisor token → “ADDON” mode, else “STANDALONE” mode
+# 1. Detect mode
+#    - If SUPERVISOR_TOKEN is present → ADDON
+#    - Else → STANDALONE
 # ---------------------------------------------------------------
-SUPERVISOR_TOKEN_VALUE="$(bashio::var.json SUPERVISOR_TOKEN 2>/dev/null || true)"
-
-if [[ -n "$SUPERVISOR_TOKEN_VALUE" ]]; then
+if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
     MODE="ADDON"
-    log "Addon mode (supervisor token present)"
-    : "${HA_TOKEN:=$SUPERVISOR_TOKEN_VALUE}"
-    : "${HA_WEBSOCKET_URL:=ws://supervisor/core/api/websocket}"
-    : "${HA_REST_URL:=http://supervisor/core/api}"
+    log "Addon mode (SUPERVISOR_TOKEN present)"
+    HA_TOKEN="${HA_TOKEN:-$SUPERVISOR_TOKEN}"
+    HA_WEBSOCKET_URL="${HA_WEBSOCKET_URL:-ws://supervisor/core/api/websocket}"
+    HA_REST_URL="${HA_REST_URL:-http://supervisor/core/api}"
 else
     MODE="STANDALONE"
     log "Standalone mode (no supervisor token)"
-    : "${HA_WEBSOCKET_URL:=ws://homeassistant.local:8123/api/websocket}"
-    : "${HA_REST_URL:=http://homeassistant.local:8123/api}"
-    if [[ -z "$HA_TOKEN" ]]; then
-        log "WARNING: HA_TOKEN not provided; pass -e HA_TOKEN=<token> when you docker-run"
-    fi
+    HA_WEBSOCKET_URL="${HA_WEBSOCKET_URL:-ws://homeassistant.local:8123/api/websocket}"
+    HA_REST_URL="${HA_REST_URL:-http://homeassistant.local:8123/api}"
+    [[ -n "${HA_TOKEN:-}" ]] || log "WARNING: HA_TOKEN not provided; pass -e HA_TOKEN=<token>"
 fi
 
 # ---------------------------------------------------------------
-# Persist the final values so every later process (php-fpm, cron,
-# etc.) inherits them.  Only needed if we *set* or *override* them.
+# 2. Persist vars for all later services
+#    Only write a file if the value is non-empty to avoid nounset errors
 # ---------------------------------------------------------------
-persist() { echo -n "$2" > "/var/run/s6/container_environment/$1"; }
+persist() {
+    local name="$1" value="$2"
+    [[ -n "$value" ]] && echo -n "$value" > "/var/run/s6/container_environment/$name"
+}
 
-persist HA_TOKEN         "${HA_TOKEN}"
-persist HA_WEBSOCKET_URL "${HA_WEBSOCKET_URL}"
-persist HA_REST_URL      "${HA_REST_URL}"
+persist HA_TOKEN         "${HA_TOKEN:-}"
+persist HA_WEBSOCKET_URL "${HA_WEBSOCKET_URL:-}"
+persist HA_REST_URL      "${HA_REST_URL:-}"
 
-log "Environment ready: MODE=$MODE"
-log "  HA_TOKEN set:     $([[ -n $HA_TOKEN ]] && echo yes || echo no)"
-log "  HA_WEBSOCKET_URL: ${HA_WEBSOCKET_URL}"
-log "  HA_REST_URL:      ${HA_REST_URL}"
+# ---------------------------------------------------------------
+# 3. Log summary
+# ---------------------------------------------------------------
+log "Environment ready – MODE=$MODE"
+log "  HA_TOKEN set:     $([[ -n ${HA_TOKEN:-} ]] && echo yes || echo no)"
+log "  HA_WEBSOCKET_URL: ${HA_WEBSOCKET_URL:-<unset>}"
+log "  HA_REST_URL:      ${HA_REST_URL:-<unset>}"
