@@ -63,11 +63,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        if (!HgHome::findOne(2)) {
-            return $this->redirect(['/hg-home/create']);
-        }
-        // For Home Assistant ingress, go directly to enter-home without redirect
-        return $this->actionEnterHome(1);
+        return $this->redirect(['/hg-home']);
     }
 
     public function actionEnterHome($id)
