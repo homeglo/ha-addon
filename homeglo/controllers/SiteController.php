@@ -8,6 +8,8 @@ use app\models\HgDeviceSensor;
 use app\models\HgHome;
 use app\models\HgHub;
 use app\models\HgUser;
+use app\models\HgGlozone;
+use app\models\HgGlozoneTimeBlock;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
