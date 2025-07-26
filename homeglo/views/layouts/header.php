@@ -163,10 +163,12 @@ use yii\helpers\Html;
                     Home Dashboard
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="/api/ha/sync/all">
-                    <i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Sync from Home Assistant
-                </a>
+                <?= Html::beginForm(['/api/ha/sync/all'], 'post'); ?>
+                    <?= Html::submitButton(
+                        '<i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i> Sync from Home Assistant',
+                        ['class' => 'dropdown-item', 'encode' => false]
+                    ); ?>
+                <?= Html::endForm(); ?>
             </div>
         </li>
 
