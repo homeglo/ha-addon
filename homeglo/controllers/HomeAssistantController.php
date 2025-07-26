@@ -44,37 +44,55 @@ class HomeAssistantController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         
-        // Debug environment
+        // Create a fresh component to test configuration
+        $ha = new \app\components\HomeAssistantComponent();
+        
+        // Debug environment - more comprehensive
         $debugInfo = [
-            'supervisor_token' => !empty(getenv('SUPERVISOR_TOKEN')),
-            'ha_token_env' => !empty(getenv('HA_TOKEN')),
-            'ha_websocket_url' => getenv('HA_WEBSOCKET_URL') ?: 'not set',
-            'ha_rest_url' => getenv('HA_REST_URL') ?: 'not set',
-            'env_file_exists' => file_exists('/app/homeglo/.env')
+            'environment' => [
+                'supervisor_token' => !empty(getenv('SUPERVISOR_TOKEN')),
+                'ha_token_env' => !empty(getenv('HA_TOKEN')),
+                'ha_access_token_env' => !empty(getenv('HA_ACCESS_TOKEN')),
+                'ha_websocket_url' => getenv('HA_WEBSOCKET_URL') ?: 'not set',
+                'ha_rest_url' => getenv('HA_REST_URL') ?: 'not set',
+            ],
+            'files' => [
+                'addon_config' => file_exists('/data/ha-config.php'),
+                'standalone_config' => file_exists(Yii::getAlias('@app/config/ha-config.php')),
+                'env_file' => file_exists('/app/homeglo/.env')
+            ],
+            'component' => [
+                'url' => $ha->homeAssistantUrl,
+                'token_present' => !empty($ha->accessToken),
+                'token_length' => strlen($ha->accessToken ?? '')
+            ],
+            'mode' => \app\helpers\IngressHelper::getDisplayMode()
         ];
         
-        error_log("HA Connection Debug: " . json_encode($debugInfo));
+        error_log("HA Connection Debug: " . json_encode($debugInfo, JSON_PRETTY_PRINT));
         
         try {
             $service = $this->createSyncService();
-            
-            // Log the HomeAssistantComponent config
-            $ha = new \app\components\HomeAssistantComponent();
-            error_log("HA Component URL: " . $ha->homeAssistantUrl);
-            error_log("HA Component Token Present: " . (!empty($ha->accessToken) ? 'Yes' : 'No'));
-            
             $connected = $service->testConnection();
             
             return [
                 'success' => $connected,
                 'message' => $connected ? 'Connection successful' : 'Connection failed',
-                'debug' => $debugInfo,
-                'ha_url' => $ha->homeAssistantUrl
+                'debug' => $debugInfo
             ];
             
         } catch (\Exception $e) {
             $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
             Yii::error("HA Connection Test Error: " . $errorMsg, __METHOD__);
+            
+            // Add error details to debug info
+            $debugInfo['error'] = [
+                'message' => $errorMsg,
+                'class' => get_class($e),
+                'file' => basename($e->getFile()),
+                'line' => $e->getLine()
+            ];
+            
             return [
                 'success' => false,
                 'message' => 'Connection test failed: ' . $errorMsg,

@@ -35,3 +35,6 @@ tests/_support/_generated
 .env
 
 /data
+
+# Home Assistant standalone config (contains access token)
+/config/ha-config.php

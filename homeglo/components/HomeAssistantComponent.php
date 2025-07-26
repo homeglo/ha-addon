@@ -43,51 +43,77 @@ class HomeAssistantComponent extends Component
     {
         parent::init();
         
-        // First check if we have a PHP config file (for addon environment)
-        $configFile = '/data/ha-config.php';
-        if (file_exists($configFile)) {
-            include_once $configFile;
+        // Try multiple configuration sources in order of preference
+        $this->loadConfiguration();
+    }
+    
+    /**
+     * Load configuration from various sources
+     */
+    private function loadConfiguration()
+    {
+        // 1. Check for addon environment config file (created by init script)
+        $addonConfigFile = '/data/ha-config.php';
+        if (file_exists($addonConfigFile)) {
+            include_once $addonConfigFile;
             if (defined('HA_WEBSOCKET_URL') && empty($this->homeAssistantUrl)) {
                 $this->homeAssistantUrl = HA_WEBSOCKET_URL;
             }
             if (defined('HA_TOKEN') && empty($this->accessToken)) {
                 $this->accessToken = HA_TOKEN;
             }
-            return; // Use config file values
+            $this->log("Loaded config from addon config file");
+            return;
         }
         
-        // Try to get WebSocket URL from environment if not set
+        // 2. Check for standalone config file
+        $standaloneConfigFile = Yii::getAlias('@app/config/ha-config.php');
+        if (file_exists($standaloneConfigFile)) {
+            $config = include $standaloneConfigFile;
+            if (is_array($config)) {
+                if (!empty($config['websocket_url']) && empty($this->homeAssistantUrl)) {
+                    $this->homeAssistantUrl = $config['websocket_url'];
+                }
+                if (!empty($config['access_token']) && empty($this->accessToken)) {
+                    $this->accessToken = $config['access_token'];
+                }
+                $this->log("Loaded config from standalone config file");
+                return;
+            }
+        }
+        
+        // 3. Check environment variables (works in both addon and standalone)
         if (empty($this->homeAssistantUrl)) {
-            // Check multiple possible environment variables
-            $envUrl = $_ENV['HA_WEBSOCKET_URL'] ?? 
-                     getenv('HA_WEBSOCKET_URL') ?? 
-                     null;
+            // Check supervisor token first (addon environment)
+            $supervisorToken = getenv('SUPERVISOR_TOKEN');
+            if (!empty($supervisorToken)) {
+                $this->homeAssistantUrl = 'ws://supervisor/core/api/websocket';
+                $this->accessToken = $supervisorToken;
+                $this->log("Using supervisor token and URL");
+                return;
+            }
+            
+            // Check standard environment variables
+            $envUrl = getenv('HA_WEBSOCKET_URL');
+            $envToken = getenv('HA_TOKEN') ?: getenv('HA_ACCESS_TOKEN');
             
             if (!empty($envUrl)) {
                 $this->homeAssistantUrl = $envUrl;
-            } else {
-                // In addon environment, use supervisor endpoint
-                if (getenv('SUPERVISOR_TOKEN')) {
-                    $this->homeAssistantUrl = 'ws://supervisor/core/api/websocket';
-                } else {
-                    // Default fallback for development
-                    $this->homeAssistantUrl = 'ws://homeassistant.local:8123/api/websocket';
-                }
             }
-        }
-        
-        // Try to get access token from environment if not set
-        if (empty($this->accessToken)) {
-            // Check multiple possible environment variables
-            $envToken = $_ENV['HA_TOKEN'] ?? 
-                       getenv('HA_TOKEN') ?? 
-                       $_ENV['SUPERVISOR_TOKEN'] ?? 
-                       getenv('SUPERVISOR_TOKEN') ?? 
-                       null;
-            
             if (!empty($envToken)) {
                 $this->accessToken = $envToken;
             }
+            
+            if (!empty($this->homeAssistantUrl) && !empty($this->accessToken)) {
+                $this->log("Loaded config from environment variables");
+                return;
+            }
+        }
+        
+        // 4. Default fallback
+        if (empty($this->homeAssistantUrl)) {
+            $this->homeAssistantUrl = 'ws://homeassistant.local:8123/api/websocket';
+            $this->log("Using default WebSocket URL");
         }
     }
 
