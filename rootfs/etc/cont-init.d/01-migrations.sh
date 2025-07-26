@@ -49,7 +49,9 @@ log "Running migrations with $(basename "$PHP_CMD")"
 # 5. Re-own everything under /data (WAL/SHM files may have appeared)
 ###############################################################################
 chown -R "$RUN_USER":"$RUN_USER" /data
-chmod 660 "$DB_FILE"
+chmod 664 "$DB_FILE"
+# Also ensure directory has proper permissions for web access
+chmod 775 /data
 
 ###############################################################################
 # 6. Smoke-test write access

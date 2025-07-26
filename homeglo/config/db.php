@@ -14,16 +14,21 @@ if (strpos($envPath, '/') === 0) {
 
 // Debug logging for database connection issues
 error_log("DB Debug: DB_PATH env var = " . ($_ENV['DB_PATH'] ?? 'NOT SET'));
+error_log("DB Debug: Current user = " . (function_exists('posix_getpwuid') ? posix_getpwuid(posix_geteuid())['name'] : 'unknown'));
+error_log("DB Debug: Current group = " . (function_exists('posix_getgrgid') ? posix_getgrgid(posix_getegid())['name'] : 'unknown'));
 error_log("DB Debug: Final dbPath = $dbPath");
 error_log("DB Debug: File exists? " . (file_exists($dbPath) ? 'YES' : 'NO'));
 if (file_exists($dbPath)) {
     error_log("DB Debug: File permissions = " . substr(sprintf('%o', fileperms($dbPath)), -4));
+    error_log("DB Debug: File owner = " . (function_exists('posix_getpwuid') ? posix_getpwuid(fileowner($dbPath))['name'] : fileowner($dbPath)));
+    error_log("DB Debug: File group = " . (function_exists('posix_getgrgid') ? posix_getgrgid(filegroup($dbPath))['name'] : filegroup($dbPath)));
     error_log("DB Debug: File readable? " . (is_readable($dbPath) ? 'YES' : 'NO'));
     error_log("DB Debug: File writable? " . (is_writable($dbPath) ? 'YES' : 'NO'));
 }
 error_log("DB Debug: Directory /data exists? " . (is_dir('/data') ? 'YES' : 'NO'));
 if (is_dir('/data')) {
     error_log("DB Debug: Directory /data writable? " . (is_writable('/data') ? 'YES' : 'NO'));
+    error_log("DB Debug: Directory /data permissions = " . substr(sprintf('%o', fileperms('/data')), -4));
 }
 
 $r = [
