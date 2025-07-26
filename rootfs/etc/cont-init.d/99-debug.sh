@@ -3,9 +3,6 @@ set -e
 
 bashio::log.info "===== DEBUG SNAPSHOT ====="
 
-bashio::log.info "1) php-fpm workers (user/group):"
-ps -o user,group,args | grep -E '[p]hp.-fpm' || bashio::log.info "  (php-fpm not started yet)"
-
 bashio::log.info "2) /app/homeglo/web contents:"
 ls -la /app/homeglo/web || true
 

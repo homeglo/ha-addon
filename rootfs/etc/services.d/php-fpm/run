@@ -1,2 +1,7 @@
 #!/usr/bin/with-contenv bashio
 exec php-fpm83 -F
+
+sleep 0.5
+
+bashio::log.info "1) php-fpm workers (user/group):"
+ps -o user,group,args | grep -E '[p]hp.-fpm' || bashio::log.info "  (php-fpm not started yet)"
