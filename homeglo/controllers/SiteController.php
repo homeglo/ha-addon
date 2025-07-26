@@ -98,44 +98,19 @@ class SiteController extends Controller
             
             if ($defaultHome->save(false)) {
                 error_log("SiteController::actionIndex - Default home created successfully");
-                
-                // Create default glozone
-                $templateGlozone = null;
-                if ($templateHome) {
-                    $templateGlozone = HgGlozone::find()->where(['hg_home_id' => 1])->one();
-                }
-                
+
                 // If no template glozone, use system default
-                if (!$templateGlozone && defined('\app\models\HgGlozone::HG_DEFAULT_GLOZONE')) {
-                    $templateGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
-                }
-                
+                $templateGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
+
                 if ($templateGlozone) {
-                    $glozone = new HgGlozone();
-                    $glozone->attributes = $templateGlozone->attributes;
-                    $glozone->id = null; // Clear ID
-                    $glozone->hg_home_id = 2;
-                    $glozone->display_name = "My Home Glozone";
-                    $glozone->save(false);
+                    $defGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
+                    $hgGlozone = new HgGlozone();
+                    $hgGlozone->attributes = $defGlozone->attributes;
+                    $hgGlozone->hg_home_id = $defaultHome->id;
+                    $hgGlozone->display_name = $defaultHome->display_name.' Glozone';
+                    $hgGlozone->save();
                     error_log("SiteController::actionIndex - Default glozone created");
-                    
-                    // Copy time blocks from template
-                    $templateTimeBlocks = HgGlozoneTimeBlock::find()->where(['hg_glozone_id' => $templateGlozone->id])->all();
-                    foreach ($templateTimeBlocks as $templateBlock) {
-                        $timeBlock = new HgGlozoneTimeBlock();
-                        $timeBlock->attributes = $templateBlock->attributes;
-                        $timeBlock->id = null;
-                        $timeBlock->hg_glozone_id = $glozone->id;
-                        $timeBlock->save(false);
-                    }
                 }
-                
-                // Create default hub
-                $hub = new HgHub();
-                $hub->display_name = "My Home Hub";
-                $hub->hg_home_id = 2;
-                $hub->save(false);
-                error_log("SiteController::actionIndex - Default hub created");
             } else {
                 error_log("SiteController::actionIndex - Failed to create default home: " . json_encode($defaultHome->getErrors()));
             }
