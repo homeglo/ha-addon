@@ -60,19 +60,6 @@ $config = [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
-                    'class' => 'yii\log\DbTarget',
-                    'exportInterval'=>1,
-                    'levels' => ['info','trace','error','warning'],
-                    'logVars' => [],
-                    'logTable'=>'log',
-                    'except' => [
-                        'yii\db\*',
-                        'yii\web\*',
-                        'yii\base\*',
-                        'yii\debug\*'
-                    ]
-                ],
-                [
                     'class' => 'yii\log\FileTarget',
                     'logFile' => 'php://stderr',
                     'levels' => ['error', 'warning'],

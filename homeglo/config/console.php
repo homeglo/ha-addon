@@ -39,17 +39,11 @@ $config = [
             'flushInterval'=>1,
             'targets' => [
                 [
-                    'class' => 'yii\log\DbTarget',
-                    'levels' => ['info','trace','error','warning'],
+                    'class' => 'yii\log\FileTarget',
+                    'logFile' => 'php://stderr',
+                    'levels' => ['error', 'warning'],
                     'logVars' => [],
-                    'logTable'=>'log',
-                    'exportInterval'=>1,
-                    'except' => [
-                        'yii\db\*',
-                        'yii\web\*',
-                        'yii\base\*',
-                        'yii\debug\*'
-                    ]
+                    'enableRotation' => false,
                 ],
             ],
         ],
