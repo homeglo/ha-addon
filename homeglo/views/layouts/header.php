@@ -1,5 +1,6 @@
 <?php
 use yii\helpers\Html;
+use app\helpers\AddonHelper;
 
 /* (C) Copyright 2019 Heru Arief Wijaya (http://belajararief.com/) untuk Indonesia.*/
 
@@ -33,7 +34,18 @@ use yii\helpers\Html;
                           $('[data-toggle=\"tooltip\"]').tooltip()
                         })"
         );
+        
+        // Get addon version
+        $addonVersion = AddonHelper::getAddonVersion();
     ?>
+    
+    <?php if ($addonVersion): ?>
+        <span class="badge badge-secondary mr-2">
+            <i class="fas fa-code-branch"></i>
+            v<?= Html::encode($addonVersion) ?>
+        </span>
+    <?php endif; ?>
+    
     <span class="badge badge-<?=$jobCount>0?'warning':'primary';?>">
             <i class="fas fa-<?=$jobCount>0?'recycle':'check';?>"></i>
             <?=$jobCount ?? 0;?>
