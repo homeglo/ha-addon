@@ -48,7 +48,8 @@ $config = [
         ],
         'assetManager' => [
             'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] . '/assets' : '/assets',
-            'basePath' => '@webroot/assets',
+            'basePath' => '/data/assets',
+            'forceCopy' => false,
         ],
         'cache' => [
             'class' => 'yii\caching\DummyCache',

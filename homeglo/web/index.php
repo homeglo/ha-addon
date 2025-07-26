@@ -13,22 +13,24 @@ if (!empty($_SERVER['HTTP_X_INGRESS_PATH'])) {
     $_SERVER['SCRIPT_NAME'] = $_SERVER['HTTP_X_INGRESS_PATH'] . '/index.php';
     $_SERVER['PHP_SELF'] = $_SERVER['SCRIPT_NAME'];
     
-    // Extract PATH_INFO from REQUEST_URI for Yii routing
-    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    // Fix REQUEST_URI to remove ingress path for Yii routing
+    $originalUri = $_SERVER['REQUEST_URI'] ?? '';
     $ingressPath = $_SERVER['HTTP_X_INGRESS_PATH'];
     
-    // Remove ingress path from request URI if it's there
-    if (strpos($requestUri, $ingressPath) === 0) {
-        $requestUri = substr($requestUri, strlen($ingressPath));
+    // Remove ingress path from request URI
+    if (strpos($originalUri, $ingressPath) === 0) {
+        $_SERVER['REQUEST_URI'] = substr($originalUri, strlen($ingressPath));
     }
     
     // Remove /index.php if present
-    $requestUri = preg_replace('/^\/index\.php/', '', $requestUri);
+    $_SERVER['REQUEST_URI'] = preg_replace('/^\/index\.php/', '', $_SERVER['REQUEST_URI']);
     
-    // Set PATH_INFO
-    $_SERVER['PATH_INFO'] = parse_url($requestUri, PHP_URL_PATH) ?: '';
+    // If empty, set to /
+    if (empty($_SERVER['REQUEST_URI'])) {
+        $_SERVER['REQUEST_URI'] = '/';
+    }
     
-    error_log("Fixed PATH_INFO: " . $_SERVER['PATH_INFO']);
+    error_log("Fixed REQUEST_URI: " . $_SERVER['REQUEST_URI'] . " (was: " . $originalUri . ")");
 }
 
 require __DIR__ . '/../vendor/autoload.php';
