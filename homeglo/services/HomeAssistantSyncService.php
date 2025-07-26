@@ -447,11 +447,10 @@ class HomeAssistantSyncService extends Component
     /**
      * Create device group for area if it doesn't exist and device has area_id
      * @param string $areaId
-     * @param HgHub $hub
      * @param HgGlozone $glozone
      * @return HgDeviceGroup|null
      */
-    private function createOrFindAreaDeviceGroup($areaId, $hub, $glozone)
+    private function createOrFindAreaDeviceGroup($areaId, $glozone)
     {
         if (empty($areaId)) {
             return null;
@@ -546,7 +545,7 @@ class HomeAssistantSyncService extends Component
         // Create or find area device group if device has area_id
         $deviceGroup = null;
         if (!empty($device['area_id'])) {
-            $deviceGroup = $this->createOrFindAreaDeviceGroup($device['area_id'], $hub, $glozone);
+            $deviceGroup = $this->createOrFindAreaDeviceGroup($device['area_id'], $glozone);
         }
 
         $deviceSensor = new HgDeviceSensor();
@@ -613,7 +612,7 @@ class HomeAssistantSyncService extends Component
         // Create or find area device group if device has area_id
         $deviceGroup = null;
         if (!empty($device['area_id'])) {
-            $deviceGroup = $this->createOrFindAreaDeviceGroup($device['area_id'], $hub, $glozone);
+            $deviceGroup = $this->createOrFindAreaDeviceGroup($device['area_id'], $glozone);
         }
 
         $deviceLight = new HgDeviceLight();
@@ -689,7 +688,7 @@ class HomeAssistantSyncService extends Component
             // Area changed - find or create new area device group
             $deviceGroup = null;
             if (!empty($currentAreaId)) {
-                $deviceGroup = $this->createOrFindAreaDeviceGroup($currentAreaId, $hub, $glozone);
+                $deviceGroup = $this->createOrFindAreaDeviceGroup($currentAreaId, $glozone);
             }
 
             $existingDevice->hg_device_group_id = $deviceGroup ? $deviceGroup->id : null;
@@ -779,7 +778,7 @@ class HomeAssistantSyncService extends Component
             // Area changed - find or create new area device group
             $deviceGroup = null;
             if (!empty($currentAreaId)) {
-                $deviceGroup = $this->createOrFindAreaDeviceGroup($currentAreaId, $hub, $glozone);
+                $deviceGroup = $this->createOrFindAreaDeviceGroup($currentAreaId, $glozone);
             }
 
             $existingDevice->primary_hg_device_group_id = $deviceGroup ? $deviceGroup->id : null;
