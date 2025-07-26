@@ -3,6 +3,10 @@
 namespace app\controllers;
 
 use app\services\HomeAssistantSyncService;
+use app\models\HgHome;
+use app\models\HgHub;
+use app\models\HgDeviceGroup;
+use app\models\HgDeviceLight;
 use Yii;
 use yii\web\Controller;
 use yii\web\Response;
@@ -223,6 +227,97 @@ class HomeAssistantController extends Controller
         }
     }
 
+    /**
+     * Debug endpoint to check sync status
+     * @return Response
+     */
+    public function actionDebug()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        try {
+            // Check home 2 setup
+            $home2 = HgHome::findOne(2);
+            if (!$home2) {
+                return [
+                    'error' => 'Home ID 2 not found',
+                    'success' => false
+                ];
+            }
+            
+            // Get all device groups for home 2
+            $deviceGroups = HgDeviceGroup::find()
+                ->where(['hg_home_id' => 2])
+                ->all();
+            
+            // Get all lights
+            $allLights = HgDeviceLight::find()->all();
+            $home2Lights = [];
+            $otherLights = [];
+            
+            foreach ($allLights as $light) {
+                $lightData = [
+                    'id' => $light->id,
+                    'display_name' => $light->display_name,
+                    'ha_device_id' => $light->ha_device_id,
+                    'group_id' => $light->primary_hg_device_group_id,
+                    'metadata' => $light->metadata
+                ];
+                
+                // Check if light belongs to home 2
+                $belongsToHome2 = false;
+                if ($light->primary_hg_device_group_id) {
+                    foreach ($deviceGroups as $group) {
+                        if ($group->id == $light->primary_hg_device_group_id) {
+                            $belongsToHome2 = true;
+                            $lightData['group_name'] = $group->display_name;
+                            break;
+                        }
+                    }
+                }
+                
+                if ($belongsToHome2) {
+                    $home2Lights[] = $lightData;
+                } else {
+                    $otherLights[] = $lightData;
+                }
+            }
+            
+            // Get hubs for home 2
+            $hubs = HgHub::find()->where(['hg_home_id' => 2])->all();
+            
+            return [
+                'success' => true,
+                'home2' => [
+                    'id' => $home2->id,
+                    'name' => $home2->display_name,
+                    'device_groups_count' => count($deviceGroups),
+                    'device_groups' => array_map(function($g) {
+                        return [
+                            'id' => $g->id,
+                            'name' => $g->display_name,
+                            'home_id' => $g->hg_home_id
+                        ];
+                    }, $deviceGroups),
+                    'hubs_count' => count($hubs)
+                ],
+                'lights' => [
+                    'total' => count($allLights),
+                    'in_home2' => count($home2Lights),
+                    'in_other_homes' => count($otherLights),
+                    'home2_lights' => $home2Lights,
+                    'other_lights' => array_slice($otherLights, 0, 5) // Just first 5 for brevity
+                ]
+            ];
+            
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
     /**
      * Create and configure the sync service
      * @param bool $dryRun

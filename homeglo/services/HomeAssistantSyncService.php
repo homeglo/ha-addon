@@ -460,7 +460,6 @@ class HomeAssistantSyncService extends Component
         // Check if area already exists as device group
         $existingGroup = HgDeviceGroup::find()
             ->where(['ha_device_id' => $areaId])
-            ->andWhere(['hg_hub_id' => $hub->id])
             ->one();
 
         if ($existingGroup) {
@@ -493,7 +492,6 @@ class HomeAssistantSyncService extends Component
             $deviceGroup = new HgDeviceGroup();
             $deviceGroup->display_name = $areaInfo['name'] ?? 'Unknown Area';
             $deviceGroup->ha_device_id = $areaId;
-            $deviceGroup->hg_hub_id = $hub->id;
             $deviceGroup->hg_glozone_id = $glozone->id;
             $deviceGroup->hg_device_group_type_id = self::DEFAULT_DEVICE_GROUP_TYPE_ID;
             $deviceGroup->room_invoke_order = 0;
@@ -536,12 +534,6 @@ class HomeAssistantSyncService extends Component
         $homeAssistantHome = HgHome::findOne(self::HOMEASSISTANT_HOME_ID);
         if (!$homeAssistantHome) {
             $this->log("  ✗ Home Assistant home not found for sensor device", 'error');
-            return false;
-        }
-
-        $hub = HgHub::find()->where(['hg_home_id' => $homeAssistantHome->id])->one();
-        if (!$hub) {
-            $this->log("  ✗ No hub found for Home Assistant home", 'error');
             return false;
         }
 
@@ -612,12 +604,6 @@ class HomeAssistantSyncService extends Component
             return false;
         }
 
-        $hub = HgHub::find()->where(['hg_home_id' => $homeAssistantHome->id])->one();
-        if (!$hub) {
-            $this->log("  ✗ No hub found for Home Assistant home", 'error');
-            return false;
-        }
-
         $glozone = $homeAssistantHome->getDefaultGlozone();
         if (!$glozone) {
             $this->log("  ✗ No default glozone found for Home Assistant home", 'error');
@@ -633,7 +619,6 @@ class HomeAssistantSyncService extends Component
         $deviceLight = new HgDeviceLight();
         $deviceLight->display_name = $device['name_by_user'] ?? 'Unknown Light';
         $deviceLight->ha_device_id = $device['id'];
-        $deviceLight->hg_hub_id = $hub->id;
         $deviceLight->hg_product_light_id = $productLight->id;
         
         // Set device group if found
@@ -687,12 +672,6 @@ class HomeAssistantSyncService extends Component
         $homeAssistantHome = HgHome::findOne(self::HOMEASSISTANT_HOME_ID);
         if (!$homeAssistantHome) {
             $this->log("  ✗ Home Assistant home not found for sensor update", 'error');
-            return false;
-        }
-
-        $hub = HgHub::find()->where(['hg_home_id' => $homeAssistantHome->id])->one();
-        if (!$hub) {
-            $this->log("  ✗ No hub found for Home Assistant home", 'error');
             return false;
         }
 
@@ -783,12 +762,6 @@ class HomeAssistantSyncService extends Component
         $homeAssistantHome = HgHome::findOne(self::HOMEASSISTANT_HOME_ID);
         if (!$homeAssistantHome) {
             $this->log("  ✗ Home Assistant home not found for light update", 'error');
-            return false;
-        }
-
-        $hub = HgHub::find()->where(['hg_home_id' => $homeAssistantHome->id])->one();
-        if (!$hub) {
-            $this->log("  ✗ No hub found for Home Assistant home", 'error');
             return false;
         }
 
