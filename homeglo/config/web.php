@@ -39,6 +39,12 @@ $config = [
             // Handle Home Assistant ingress
             'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
             'scriptUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] . '/index.php' : '',
+            // Fix CSRF cookie path to work with ingress
+            'csrfCookie' => [
+                'httpOnly' => true,
+                'sameSite' => 'Lax',
+                'path' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '/',
+            ],
         ],
         'assetManager' => [
             'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] . '/assets' : '/assets',
@@ -73,6 +79,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'enableStrictParsing' => false,
+            'baseUrl' => !empty($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : '',
             'rules' => [
                 // Home Assistant API endpoints
                 'api/ha/test' => 'home-assistant/test-connection',
