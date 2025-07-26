@@ -328,6 +328,13 @@ class HomeAssistantController extends Controller
         return new HomeAssistantSyncService([
             'dryRun' => $dryRun,
             'logger' => function($message, $level = 'info') {
+                // Ensure message is a string to avoid array to string conversion errors
+                if (is_array($message) || is_object($message)) {
+                    $message = json_encode($message, JSON_PRETTY_PRINT);
+                } else {
+                    $message = (string)$message;
+                }
+                
                 if ($level === 'error') {
                     Yii::error($message, __METHOD__);
                 } else {
