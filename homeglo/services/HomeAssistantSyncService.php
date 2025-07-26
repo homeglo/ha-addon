@@ -283,27 +283,14 @@ class HomeAssistantSyncService extends Component
             'errors' => []
         ];
 
-        try {
             // Sync location data first (needed for areas sync)
             $results['location'] = $this->syncLocationData();
             $this->log("Location sync completed successfully");
-        } catch (\Exception $e) {
-            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
-            $results['errors'][] = "Location sync failed: " . $errorMsg;
-            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
-            $this->log("Location sync failed: " . $errorMsg, 'error');
-        }
 
 
-        try {
             // Sync devices
             $results['devices'] = $this->syncDevices($deviceTypeFilter);
             $this->log("Device sync completed successfully");
-        } catch (\Exception $e) {
-            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
-            $results['errors'][] = "Device sync failed: " . $errorMsg;
-            $this->log("Device sync failed: " . $errorMsg, 'error');
-        }
 
         $results['success'] = empty($results['errors']);
         
@@ -478,7 +465,6 @@ class HomeAssistantSyncService extends Component
         }
 
         // Get area information from Home Assistant
-        try {
             $this->log("  - Fetching area registry from Home Assistant...");
             $areas = $this->homeAssistant->getAreaRegistry();
             $this->log("  - Got " . count($areas) . " areas from registry");
@@ -492,12 +478,6 @@ class HomeAssistantSyncService extends Component
                     break;
                 }
             }
-        } catch (\Throwable $e) {
-            $this->log("  ✗ Exception while fetching areas: " . get_class($e) . " - " . $e->getMessage());
-            $this->log("  - File: " . $e->getFile() . ":" . $e->getLine());
-            $this->log("  - Trace: " . $e->getTraceAsString());
-            throw $e;
-        }
 
             if (!$areaInfo) {
                 $this->log("  - Area info not found for area_id: {$areaId}");

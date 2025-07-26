@@ -28,9 +28,9 @@ class HomeAssistantController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'sync-devices' => ['POST'],
-                    'sync-location' => ['POST'],
-                    'sync-all' => ['POST'],
+                    'sync-devices' => ['GET'],
+                    'sync-location' => ['GET'],
+                    'sync-all' => ['GET'],
                 ],
             ],
         ];
@@ -111,8 +111,7 @@ class HomeAssistantController extends Controller
         
         $deviceTypes = Yii::$app->request->post('device_types', []);
         $dryRun = Yii::$app->request->post('dry_run', false);
-        
-        try {
+
             $service = $this->createSyncService($dryRun);
             $stats = $service->syncDevices($deviceTypes);
             
@@ -121,15 +120,6 @@ class HomeAssistantController extends Controller
                 'message' => 'Device sync completed successfully',
                 'data' => $stats
             ];
-            
-        } catch (\Exception $e) {
-            $errorMsg = is_string($e->getMessage()) ? $e->getMessage() : json_encode($e->getMessage());
-            Yii::error("HA Device Sync Error: " . $errorMsg, __METHOD__);
-            return [
-                'success' => false,
-                'message' => 'Device sync failed: ' . $errorMsg
-            ];
-        }
     }
 
 
