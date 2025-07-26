@@ -52,8 +52,26 @@ error_log("index.php - SCRIPT_NAME: " . ($_SERVER['SCRIPT_NAME'] ?? 'not set'));
 error_log("index.php - X-Ingress-Path: " . ($_SERVER['HTTP_X_INGRESS_PATH'] ?? 'not set'));
 
 $app->on(yii\base\Application::EVENT_BEFORE_REQUEST, function ($event) {
-    error_log("Application - Parsed route: " . Yii::$app->request->pathInfo);
-    error_log("Application - Resolved route: " . json_encode(Yii::$app->request->resolve()));
+    // Manually set pathInfo from REQUEST_URI
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    $requestUri = strtok($requestUri, '?'); // Remove query string
+    $requestUri = ltrim($requestUri, '/');
+    
+    if (!empty($requestUri) && $requestUri !== 'index.php') {
+        Yii::$app->request->setPathInfo($requestUri);
+        error_log("Application - Set pathInfo to: " . $requestUri);
+    }
+    
+    $pathInfo = Yii::$app->request->getPathInfo();
+    error_log("Application - Parsed route: " . $pathInfo);
+    error_log("Application - Request URL: " . Yii::$app->request->getUrl());
+    
+    try {
+        $route = Yii::$app->request->resolve();
+        error_log("Application - Resolved route: " . json_encode($route));
+    } catch (Exception $e) {
+        error_log("Application - Route resolution error: " . $e->getMessage());
+    }
 });
 
 $app->run();
