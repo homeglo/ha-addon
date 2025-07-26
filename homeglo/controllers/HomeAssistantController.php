@@ -57,9 +57,9 @@ class HomeAssistantController extends Controller
                 'ha_rest_url' => getenv('HA_REST_URL') ?: 'not set',
             ],
             'files' => [
-                'addon_config' => file_exists('/data/ha-config.php'),
+                'env_file' => file_exists('/app/homeglo/.env'),
                 'standalone_config' => file_exists(Yii::getAlias('@app/config/ha-config.php')),
-                'env_file' => file_exists('/app/homeglo/.env')
+                'legacy_addon_config' => file_exists('/data/ha-config.php')
             ],
             'component' => [
                 'url' => $ha->homeAssistantUrl,
