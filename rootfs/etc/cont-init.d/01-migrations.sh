@@ -15,13 +15,15 @@ chmod -R 777 /app/homeglo/runtime
 # Ensure /data directory exists (Home Assistant persistent storage)
 bashio::log.info "Setting up /data directory..."
 mkdir -p /data
-chmod -R 777 /data
+chmod 777 /data
+chown -R nginx:nginx /data 2>/dev/null || chown -R 82:82 /data 2>/dev/null || true
 
 # Create database file in /data if it doesn't exist
 if [ ! -f /data/database.sqlite ]; then
     bashio::log.info "Creating database file in /data..."
     touch /data/database.sqlite
-    chmod 666 /data/database.sqlite
+    chmod 777 /data/database.sqlite
+    chown nginx:nginx /data/database.sqlite 2>/dev/null || chown 82:82 /data/database.sqlite 2>/dev/null || true
 else
     bashio::log.info "Database file already exists in /data"
 fi
@@ -60,9 +62,15 @@ $PHP_CMD yii migrate --interactive=0 2>&1 || {
 
 # Fix database permissions after migrations
 if [ -f /data/database.sqlite ]; then
-    bashio::log.info "Setting database file permissions to 777..."
+    bashio::log.info "Database file exists, checking current permissions:"
+    ls -la /data/database.sqlite
+    bashio::log.info "Setting database file permissions and ownership..."
     chmod 777 /data/database.sqlite
-    bashio::log.info "Database permissions set"
+    chown nginx:nginx /data/database.sqlite 2>/dev/null || chown 82:82 /data/database.sqlite 2>/dev/null || true
+    bashio::log.info "Permissions after chmod/chown:"
+    ls -la /data/database.sqlite
+    bashio::log.info "Directory permissions for /data:"
+    ls -ld /data/
 else
     bashio::log.warning "Database file not found after migrations"
 fi
