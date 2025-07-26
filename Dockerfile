@@ -41,7 +41,7 @@ RUN apk add --no-cache \
         su-exec
 
 # Copy code from builder
-COPY --from=build /homeglo /app/homeglo
+COPY --from=build /app /app/homeglo
 
 # Copy s6 service scripts (see below)
 COPY rootfs/ /
