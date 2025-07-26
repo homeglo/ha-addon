@@ -1,12 +1,48 @@
 #!/usr/bin/with-contenv bashio
 
-# Export supervisor token for PHP (let bashio handle the token extraction)
-export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
-export HA_TOKEN="${SUPERVISOR_TOKEN}"
-export HA_WEBSOCKET_URL="ws://supervisor/core/api/websocket"
-export HA_REST_URL="http://supervisor/core/api"
+# Detect if we're in addon mode or standalone mode
+if [[ -n "$SUPERVISOR_TOKEN" ]]; then
+    # Addon mode - export supervisor token and URLs
+    export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
+    export HA_TOKEN="${SUPERVISOR_TOKEN}"
+    export HA_WEBSOCKET_URL="ws://supervisor/core/api/websocket"
+    export HA_REST_URL="http://supervisor/core/api"
+    echo "PHP-FPM starting in ADDON mode with supervisor token"
+else
+    # Standalone mode - use environment variables or defaults
+    echo "PHP-FPM starting in STANDALONE mode"
+    
+    # Export any environment variables that might be set for standalone
+    if [[ -n "$HA_TOKEN" ]]; then
+        export HA_TOKEN="${HA_TOKEN}"
+        echo "Using HA_TOKEN from environment"
+    fi
+    
+    if [[ -n "$HA_ACCESS_TOKEN" ]]; then
+        export HA_TOKEN="${HA_ACCESS_TOKEN}"
+        echo "Using HA_ACCESS_TOKEN from environment"
+    fi
+    
+    if [[ -n "$HA_WEBSOCKET_URL" ]]; then
+        export HA_WEBSOCKET_URL="${HA_WEBSOCKET_URL}"
+        echo "Using HA_WEBSOCKET_URL: $HA_WEBSOCKET_URL"
+    else
+        # Default for standalone mode
+        export HA_WEBSOCKET_URL="ws://homeassistant.local:8123/api/websocket"
+        echo "Using default WebSocket URL: $HA_WEBSOCKET_URL"
+    fi
+    
+    if [[ -n "$HA_REST_URL" ]]; then
+        export HA_REST_URL="${HA_REST_URL}"
+    else
+        # Default for standalone mode
+        export HA_REST_URL="http://homeassistant.local:8123/api"
+    fi
+fi
 
-echo "PHP-FPM starting with HA connection vars"
-echo "SUPERVISOR_TOKEN present: $([[ -n "$SUPERVISOR_TOKEN" ]] && echo "Yes" || echo "No")"
+echo "Final environment:"
+echo "  HA_TOKEN present: $([[ -n "$HA_TOKEN" ]] && echo "Yes" || echo "No")"
+echo "  HA_WEBSOCKET_URL: ${HA_WEBSOCKET_URL:-not set}"
+echo "  HA_REST_URL: ${HA_REST_URL:-not set}"
 
 exec php-fpm83 -F
