@@ -43,6 +43,19 @@ class HomeAssistantComponent extends Component
     {
         parent::init();
         
+        // First check if we have a PHP config file (for addon environment)
+        $configFile = '/data/ha-config.php';
+        if (file_exists($configFile)) {
+            include_once $configFile;
+            if (defined('HA_WEBSOCKET_URL') && empty($this->homeAssistantUrl)) {
+                $this->homeAssistantUrl = HA_WEBSOCKET_URL;
+            }
+            if (defined('HA_TOKEN') && empty($this->accessToken)) {
+                $this->accessToken = HA_TOKEN;
+            }
+            return; // Use config file values
+        }
+        
         // Try to get WebSocket URL from environment if not set
         if (empty($this->homeAssistantUrl)) {
             // Check multiple possible environment variables

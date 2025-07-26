@@ -1,2 +1,9 @@
 #!/usr/bin/with-contenv bashio
+
+# Export supervisor token for PHP
+export SUPERVISOR_TOKEN="${SUPERVISOR_TOKEN}"
+export HA_TOKEN="${SUPERVISOR_TOKEN}"
+export HA_WEBSOCKET_URL="ws://supervisor/core/api/websocket"
+export HA_REST_URL="http://supervisor/core/api"
+
 exec php-fpm83 -F
