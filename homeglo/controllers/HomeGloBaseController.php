@@ -53,49 +53,52 @@ class HomeGloBaseController extends Controller
 
     public function beforeAction($event)
     {
+        error_log("HomeGloBaseController::beforeAction - Controller: " . $this->id . ", Action: " . $this->action->id);
+        error_log("HomeGloBaseController::beforeAction - Current URI: " . Yii::$app->request->url);
+        
         if ($home_record = Yii::$app->session->get('home_record',false)) {
+            error_log("HomeGloBaseController::beforeAction - Found home_record in session: " . $home_record->id);
             $this->home_record = HgHome::findOne($home_record->id);
         } else {
+            error_log("HomeGloBaseController::beforeAction - No home_record in session, auto-setting default home");
             // Auto-setup default home (ID 1) for local Home Assistant setup
             $defaultHome = HgHome::findOne(1);
             if ($defaultHome) {
                 $this->home_record = $defaultHome;
                 Yii::$app->session->set('home_record', $defaultHome);
-                
-                // Auto-setup hubs for default home
-                $hubs = HgHub::find()->where(['hg_home_id' => 1])->all();
-                $hubArray = [];
-                foreach ($hubs as $h) {
-                    $hubArray[$h->id] = $h;
-                }
-                Yii::$app->session->set('home_hubs', $hubArray);
+                error_log("HomeGloBaseController::beforeAction - Set default home in session");
             } else {
+                error_log("HomeGloBaseController::beforeAction - Default home (ID 1) not found!");
                 Yii::$app->session->setFlash('error','Default home (ID 1) not found!');
             }
         }
 
         if ($home_hubs = Yii::$app->session->get('home_hubs',false)) {
+            error_log("HomeGloBaseController::beforeAction - Found home_hubs in session");
             $this->home_hubs = HgHub::find()->where(['hg_home_id'=>$this->home_record['id']])->all();
 
             foreach ($this->home_hubs as $h) {
                 $this->home_hub_ids[] = $h['id'];
             }
         } else {
-            // This should now be handled above
-            Yii::$app->session->setFlash('error','No hubs available!');
+            error_log("HomeGloBaseController::beforeAction - No home_hubs in session, loading from DB");
+            // Load hubs from database
+            if ($this->home_record) {
+                $this->home_hubs = HgHub::find()->where(['hg_home_id'=>$this->home_record['id']])->all();
+                foreach ($this->home_hubs as $h) {
+                    $this->home_hub_ids[] = $h['id'];
+                }
+                if (count($this->home_hubs) > 0) {
+                    Yii::$app->session->set('home_hubs', $this->home_hubs);
+                    error_log("HomeGloBaseController::beforeAction - Loaded " . count($this->home_hubs) . " hubs from DB and set in session");
+                } else {
+                    error_log("HomeGloBaseController::beforeAction - No hubs found in DB for home " . $this->home_record['id']);
+                    Yii::$app->session->setFlash('error','No hubs available!');
+                }
+            }
         }
 
         // No need to redirect - we auto-setup the default home above
         return parent::beforeAction($event);
-    }
-
-    public function actionSyncDown()
-    {
-        // TODO: Update for Home Assistant - sync down functionality no longer needed
-        // Previous logic synced Hue hub state down to local database - replace with HA integration if needed
-        // SyncDownJob removed - no longer syncing from Hue hub
-
-        \Yii::$app->session->setFlash('info','Sync functionality temporarily disabled during Home Assistant migration');
-        $this->redirect(\Yii::$app->request->referrer);
     }
 }

@@ -63,6 +63,9 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        error_log("SiteController::actionIndex - Current URI: " . \Yii::$app->request->url);
+        error_log("SiteController::actionIndex - X-Ingress-Path: " . (isset($_SERVER['HTTP_X_INGRESS_PATH']) ? $_SERVER['HTTP_X_INGRESS_PATH'] : 'not set'));
+        error_log("SiteController::actionIndex - Redirecting to /hg-home");
         return $this->redirect(['/hg-home']);
     }
 

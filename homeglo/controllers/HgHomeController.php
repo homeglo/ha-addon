@@ -49,6 +49,18 @@ class HgHomeController extends Controller
      */
     public function actionIndex()
     {
+        error_log("HgHomeController::actionIndex - Current URI: " . \Yii::$app->request->url);
+        
+        // For Home Assistant setup, auto-redirect to home ID 1
+        $defaultHome = HgHome::findOne(1);
+        if ($defaultHome) {
+            error_log("HgHomeController::actionIndex - Found default home, redirecting to enter-home");
+            return $this->redirect(['/site/enter-home', 'id' => 1]);
+        }
+        
+        // If no default home, show the list
+        error_log("HgHomeController::actionIndex - No default home found, showing list");
+        
         \Yii::$app->session->set('home_record',null);
         \Yii::$app->session->set('home_hubs',null);
 
