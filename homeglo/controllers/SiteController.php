@@ -64,7 +64,7 @@ class SiteController extends Controller
     public function actionIndex()
     {
         // For Home Assistant ingress, go directly to enter-home without redirect
-        return $this->actionEnterHome(2);
+        return $this->actionEnterHome(1);
     }
 
     public function actionEnterHome($id)
