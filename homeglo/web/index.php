@@ -24,4 +24,17 @@ if (file_exists(__DIR__ . '/../.env')) {
 require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
 $config = require __DIR__ . '/../config/web.php';
 
-(new yii\web\Application($config))->run();
+$app = new yii\web\Application($config);
+
+// Debug routing
+error_log("index.php - REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'not set'));
+error_log("index.php - PATH_INFO: " . ($_SERVER['PATH_INFO'] ?? 'not set'));
+error_log("index.php - SCRIPT_NAME: " . ($_SERVER['SCRIPT_NAME'] ?? 'not set'));
+error_log("index.php - X-Ingress-Path: " . ($_SERVER['HTTP_X_INGRESS_PATH'] ?? 'not set'));
+
+$app->on(yii\base\Application::EVENT_BEFORE_REQUEST, function ($event) {
+    error_log("Application - Parsed route: " . Yii::$app->request->pathInfo);
+    error_log("Application - Resolved route: " . json_encode(Yii::$app->request->resolve()));
+});
+
+$app->run();

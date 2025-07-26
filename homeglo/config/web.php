@@ -9,6 +9,7 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'defaultRoute' => 'site/index',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -80,8 +81,10 @@ $config = [
                 'api/ha/sync/all' => 'home-assistant/sync-all',
                 'api/ha/status' => 'home-assistant/status',
                 
-                //'/<controller:\w+>/<action:\w+>' => '<controller>/<action>',
-                //'/<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
+                // Standard controller/action routes
+                '<controller:\w+>' => '<controller>/index',
+                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
+                '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
             ],
         ],
         'db' => $db
