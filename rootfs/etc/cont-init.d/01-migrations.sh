@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/usr/bin/with-contenv bashio
 # Runs Yii DB migrations exactly once per container start
 
 set -Eeuo pipefail
