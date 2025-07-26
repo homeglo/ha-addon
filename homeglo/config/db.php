@@ -13,6 +13,7 @@ if (strpos($envPath, '/') === 0) {
 // SQLite will create the file if it doesn't exist and we have write permissions
 
 // Debug logging for database connection issues
+/*
 error_log("DB Debug: DB_PATH env var = " . ($_ENV['DB_PATH'] ?? 'NOT SET'));
 error_log("DB Debug: Current user = " . (function_exists('posix_getpwuid') ? posix_getpwuid(posix_geteuid())['name'] : 'unknown'));
 error_log("DB Debug: Current group = " . (function_exists('posix_getgrgid') ? posix_getgrgid(posix_getegid())['name'] : 'unknown'));
@@ -29,7 +30,7 @@ error_log("DB Debug: Directory /data exists? " . (is_dir('/data') ? 'YES' : 'NO'
 if (is_dir('/data')) {
     error_log("DB Debug: Directory /data writable? " . (is_writable('/data') ? 'YES' : 'NO'));
     error_log("DB Debug: Directory /data permissions = " . substr(sprintf('%o', fileperms('/data')), -4));
-}
+}*/
 
 $r = [
     'class' => 'yii\db\Connection',
