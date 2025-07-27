@@ -115,9 +115,10 @@ class SiteController extends Controller
             $results = $service->syncAll();
             
             if ($results['success']) {
+                $results = $results['devices'];
                 Yii::$app->session->setFlash('success', 'Home Assistant sync completed successfully! ' . 
-                    'Lights: ' . ($results['lights']['created'] ?? 0) . ' created, ' . ($results['lights']['updated'] ?? 0) . ' updated. ' .
-                    'Areas: ' . ($results['areas']['created'] ?? 0) . ' created, ' . ($results['areas']['updated'] ?? 0) . ' updated.');
+                    'Lights: ' . ($results['created_lights'] ?? 0) . ' created, ' . ($results['updated_lights'] ?? 0) . ' updated. ' .
+                    'Sensors: ' . ($results['created_sensors'] ?? 0) . ' created, ' . ($results['updated_sensors'] ?? 0) . ' updated.');
             } else {
                 Yii::$app->session->setFlash('error', 'Sync completed with errors. Please check the logs.');
             }
