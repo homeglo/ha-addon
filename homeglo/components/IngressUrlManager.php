@@ -26,17 +26,11 @@ class IngressUrlManager extends UrlManager
             return $this->createAbsoluteUrl($params, $scheme);
         }
         
-        // Get the base URL from parent
+        // Get the base URL from parent - this already includes baseUrl from config
         $url = parent::createUrl($params);
         
-        // In ingress mode, prepend the ingress path
-        if (IngressHelper::isIngressMode()) {
-            $ingressPath = IngressHelper::getIngressPath();
-            // Remove leading slash from URL if present
-            $url = ltrim($url, '/');
-            return $ingressPath . '/' . $url;
-        }
-        
+        // The parent already handles the baseUrl which includes ingress path
+        // so we don't need to add it again
         return $url;
     }
     

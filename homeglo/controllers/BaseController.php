@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use yii\web\Controller;
-use app\helpers\IngressHelper;
+use yii\helpers\Url;
 
 /**
  * Base controller that handles ingress URLs in redirects
@@ -12,7 +12,7 @@ class BaseController extends Controller
 {
     /**
      * Redirects the browser to the specified URL.
-     * Automatically handles ingress paths.
+     * Uses Url::to() which will use our custom IngressUrlManager
      * 
      * @param string|array $url the URL to be redirected to
      * @param int $statusCode the HTTP status code. Defaults to 302
@@ -21,7 +21,8 @@ class BaseController extends Controller
     public function redirect($url, $statusCode = 302)
     {
         if (is_array($url)) {
-            $url = IngressHelper::createUrl($url);
+            // Use Url::to() which will use our custom IngressUrlManager
+            $url = Url::to($url);
         }
         
         return parent::redirect($url, $statusCode);

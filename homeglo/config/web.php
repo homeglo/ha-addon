@@ -77,7 +77,6 @@ $config = [
             ],
         ],
         'urlManager' => [
-            'class' => 'app\components\IngressUrlManager',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'enableStrictParsing' => false,
