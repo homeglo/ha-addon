@@ -10,16 +10,10 @@ error_reporting(E_ALL);
 
 // Fix for Home Assistant ingress
 if (!empty($_SERVER['HTTP_X_INGRESS_PATH'])) {
-    $ingressPath = $_SERVER['HTTP_X_INGRESS_PATH'];
-    $originalUri = $_SERVER['REQUEST_URI'] ?? '';
+    $_SERVER['SCRIPT_NAME'] = $_SERVER['HTTP_X_INGRESS_PATH'] . '/index.php';
     
-    // Only remove ingress path from REQUEST_URI for Yii routing
-    if (strpos($originalUri, $ingressPath) === 0) {
-        $_SERVER['REQUEST_URI'] = substr($originalUri, strlen($ingressPath));
-        if (empty($_SERVER['REQUEST_URI'])) {
-            $_SERVER['REQUEST_URI'] = '/';
-        }
-    }
+    // Keep REQUEST_URI as-is for Yii to handle properly
+    // The baseUrl in config will handle the ingress path
 }
 
 require __DIR__ . '/../vendor/autoload.php';
