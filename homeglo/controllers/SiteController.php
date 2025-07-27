@@ -125,7 +125,7 @@ class SiteController extends Controller
             Yii::$app->session->setFlash('error', 'Sync failed: ' . $e->getMessage());
         }
         
-        return $this->redirect(IngressHelper::createUrl(['index']));
+        return $this->redirect(IngressHelper::createUrl(['/site/index']));
     }
 
     public function actionDashboard($hg_home_id)
