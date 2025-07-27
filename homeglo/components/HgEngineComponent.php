@@ -344,6 +344,17 @@ class HgEngineComponent extends Component {
                         // Convert HA state to Hue-like format for compatibility
                         // Use the device light ID as the key to maintain compatibility with existing logic
                         $deviceLightId = $groupEntityIds[$state['entity_id']];
+                        
+                        // Determine color mode based on HA attributes
+                        $colormode = 'ct'; // default
+                        if (isset($state['attributes']['color_mode'])) {
+                            if ($state['attributes']['color_mode'] === 'color_temp') {
+                                $colormode = 'ct';
+                            } else if ($state['attributes']['color_mode'] === 'xy') {
+                                $colormode = 'xy';
+                            }
+                        }
+                        
                         $hueLightsData[$deviceLightId] = [
                             'state' => [
                                 'on' => $state['state'] === 'on',
@@ -351,7 +362,7 @@ class HgEngineComponent extends Component {
                                 'bri' => isset($state['attributes']['brightness']) ? $state['attributes']['brightness'] : 0,
                                 'ct' => isset($state['attributes']['color_temp']) ? $state['attributes']['color_temp'] : null,
                                 'xy' => isset($state['attributes']['xy_color']) ? $state['attributes']['xy_color'] : null,
-                                'colormode' => isset($state['attributes']['color_mode']) ? $state['attributes']['color_mode'] : 'ct'
+                                'colormode' => $colormode
                             ],
                             'entity_id' => $state['entity_id'] // Keep entity ID for reference
                         ];
@@ -364,6 +375,9 @@ class HgEngineComponent extends Component {
 
         //pull all bulbs in scene
         $previousHgGLoDevices = HgGloDeviceLight::find()->where(['hg_hub_id'=>$this->_hg_hub_id,'hg_device_group_id'=>$hgDeviceGroup->id,'hg_glo_id'=>$previousHgGlo->id])->all();
+        
+        Yii::info('Found ' . count($previousHgGLoDevices) . ' previous glo devices for comparison', __METHOD__);
+        Yii::info('Found ' . count($hueLightsData) . ' current light states from HA', __METHOD__);
 
         $return_status = NULL;
         switch ($hgGlozoneSmartTransition->behavior_name) {
@@ -502,20 +516,32 @@ class HgEngineComponent extends Component {
                     // For HA, compare by device light ID instead of hue_id
                     if ($hgGloDeviceLight->hgDeviceLight->isBulb && $hgGloDeviceLight->hgDeviceLight->id == $device_light_id) { //if they are the same light
                         $totalCount++;
+                        $matched = false;
+                        
                         //check for ct match
-                        if ( ($light_data['state']['colormode'] == 'ct')) {
-                            if ($result_ct = HelperComponent::compareCtColors($hgGloDeviceLight->hueCt,$light_data['state']['ct']))
+                        if ($light_data['state']['colormode'] == 'ct' && $hgGloDeviceLight->hueCt && $light_data['state']['ct'] !== null) {
+                            $result_ct = HelperComponent::compareCtColors($hgGloDeviceLight->hueCt, $light_data['state']['ct']);
+                            if ($result_ct) {
                                 $trueCount++;
-                            Yii::info('__SMARTTRANSITION_CYCLE_ON_: Color Mode CT Compare Glo hg_device_light ('.$hgGloDeviceLight->hgDeviceLight->display_name.'):'.$hgGloDeviceLight->hueCt.' == State:'.$light_data['state']['ct'].' -- Result:'.($result_ct ?? 0),__METHOD__);
-                            $resultData[$hgGloDeviceLight->hgDeviceLight->display_name] = 'Result:'.($result_ct?:'FALSE').' - Current State:'.$light_data['state']['ct']. ' - Expected State:'.$hgGloDeviceLight->hueCt;
+                                $matched = true;
+                            }
+                            Yii::info('__SMARTTRANSITION_CYCLE_ON_: Color Mode CT Compare Glo hg_device_light ('.$hgGloDeviceLight->hgDeviceLight->display_name.'):'.$hgGloDeviceLight->hueCt.' == State:'.$light_data['state']['ct'].' -- Result:'.($result_ct ? 'TRUE' : 'FALSE'),__METHOD__);
+                            $resultData[$hgGloDeviceLight->hgDeviceLight->display_name] = 'CT Mode - Result:'.($result_ct?'TRUE':'FALSE').' - Current State:'.$light_data['state']['ct']. ' - Expected State:'.$hgGloDeviceLight->hueCt;
                         }
-
                         //check for xy match
-                        if ($light_data['state']['colormode'] == 'xy') {
-                            if ($result_xy = HelperComponent::compareXyColors([$hgGloDeviceLight->hueX,$hgGloDeviceLight->hueY],$light_data['state']['xy']))
+                        else if ($light_data['state']['colormode'] == 'xy' && $hgGloDeviceLight->hueX && $hgGloDeviceLight->hueY && $light_data['state']['xy'] !== null) {
+                            $result_xy = HelperComponent::compareXyColors([$hgGloDeviceLight->hueX,$hgGloDeviceLight->hueY], $light_data['state']['xy']);
+                            if ($result_xy) {
                                 $trueCount++;
-                            Yii::info('__SMARTTRANSITION_CYCLE_ON__: Color Mode XY Compare Glo ('.$hgGloDeviceLight->hgDeviceLight->display_name.'):['.$hgGloDeviceLight->hueX.','.$hgGloDeviceLight->hueY.'] == State:['.$light_data['state']['xy'][0].','.$light_data['state']['xy'][1].'] -- Result:'.($result_xy ?? 0),__METHOD__);
-                            $resultData[$hgGloDeviceLight->hgDeviceLight->display_name] = 'Result:'.($result_xy?:'FALSE').' - Current State:'.'['.$light_data['state']['xy'][0].','.$light_data['state']['xy'][1].']'. ' - Expected State:'.'['.$hgGloDeviceLight->hueX.','.$hgGloDeviceLight->hueY.']';
+                                $matched = true;
+                            }
+                            Yii::info('__SMARTTRANSITION_CYCLE_ON__: Color Mode XY Compare Glo ('.$hgGloDeviceLight->hgDeviceLight->display_name.'):['.$hgGloDeviceLight->hueX.','.$hgGloDeviceLight->hueY.'] == State:['.$light_data['state']['xy'][0].','.$light_data['state']['xy'][1].'] -- Result:'.($result_xy ? 'TRUE' : 'FALSE'),__METHOD__);
+                            $resultData[$hgGloDeviceLight->hgDeviceLight->display_name] = 'XY Mode - Result:'.($result_xy?'TRUE':'FALSE').' - Current State:'.'['.$light_data['state']['xy'][0].','.$light_data['state']['xy'][1].']'. ' - Expected State:'.'['.$hgGloDeviceLight->hueX.','.$hgGloDeviceLight->hueY.']';
+                        }
+                        // If color modes don't match or no color data, it's not a match
+                        else {
+                            Yii::info('__SMARTTRANSITION_CYCLE_ON__: Color mode mismatch or missing data for light ('.$hgGloDeviceLight->hgDeviceLight->display_name.'). Light colormode: '.$light_data['state']['colormode'].', has CT: '.($hgGloDeviceLight->hueCt ? 'yes' : 'no').', has XY: '.($hgGloDeviceLight->hueX && $hgGloDeviceLight->hueY ? 'yes' : 'no'),__METHOD__);
+                            $resultData[$hgGloDeviceLight->hgDeviceLight->display_name] = 'Color mode mismatch - Light mode: '.$light_data['state']['colormode'].', Expected: '.($hgGloDeviceLight->hueCt ? 'ct' : 'xy');
                         }
                     }
                 }
