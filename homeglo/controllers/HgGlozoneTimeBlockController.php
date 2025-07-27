@@ -182,7 +182,8 @@ class HgGlozoneTimeBlockController extends GlozoneBaseController
     {
         $model = $this->findModel($id);
         foreach (HgGlozoneSmartTransition::getSchedulerQuery()->andWhere(['hg_glozone_time_block_id'=>$id])->all() as $hgGlozoneSmartTransitionRoom) {
-            $engine = new HgEngineComponent($hgGlozoneSmartTransitionRoom->hgDeviceGroup->hg_hub_id);
+            // Pass null for hub_id to use Home Assistant
+            $engine = new HgEngineComponent(null);
             try {
                 $engine->processSmartTransition($hgGlozoneSmartTransitionRoom);
             } catch (\Throwable $t) {

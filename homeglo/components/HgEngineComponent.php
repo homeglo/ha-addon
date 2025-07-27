@@ -42,12 +42,13 @@ use yii\helpers\VarDumper;
  * and will need significant updates for Home Assistant compatibility.
  */
 class HgEngineComponent extends Component {
-    private int $_hg_hub_id;
+    private ?int $_hg_hub_id;
     private ?int $_hg_device_group_id;
     private int $_hg_version_id;
 
-    private HgHub $_hgHub;
+    private ?HgHub $_hgHub;
     private ?HgDeviceGroup $_hgDeviceGroup;
+    private ?HomeAssistantComponent $_haComponent = null;
 
     function __construct($hg_hub_id, $_hg_device_group_id=NULL, $_hg_version_id=HgVersion::HG_VERSION_MANUAL_ENTRY,)
     {
@@ -55,7 +56,13 @@ class HgEngineComponent extends Component {
         $this->_hg_device_group_id = $_hg_device_group_id;
         $this->_hg_version_id = $_hg_version_id;
 
-        $this->_hgHub = HgHub::findOne($this->_hg_hub_id);
+        if ($this->_hg_hub_id) {
+            $this->_hgHub = HgHub::findOne($this->_hg_hub_id);
+        } else {
+            $this->_hgHub = null;
+            // Initialize Home Assistant component when no hub is provided
+            $this->_haComponent = new HomeAssistantComponent();
+        }
         $this->_hgDeviceGroup = HgDeviceGroup::findOne($this->_hg_device_group_id);
         parent::__construct();
     }
@@ -305,12 +312,35 @@ class HgEngineComponent extends Component {
     public function processSmartTransition(HgGlozoneSmartTransition $hgGlozoneSmartTransition, HgGlozoneSmartTransitionExecute $hgGlozoneSmartTransitionExecute=NULL)
     {
         Yii::info('------------BEGIN--------'.$hgGlozoneSmartTransition->hgGlozoneTimeBlock->timeStartDefaultFormatted.'----TimeBlock:'.$hgGlozoneSmartTransition->hgGlozoneTimeBlock->display_name.'----Room:'.$hgGlozoneSmartTransition->hgDeviceGroup->display_name.'----Behavior'.$hgGlozoneSmartTransition->behavior_name.'----Glo:'.$hgGlozoneSmartTransition->hgGlozoneTimeBlock->defaultHgGlo->display_name,__METHOD__);
-        $hueComponent = $this->_hgHub->getHueComponent();
+        
         $hgDeviceGroup = $hgGlozoneSmartTransition->hgDeviceGroup; //Current room
         $hgGlo = $hgGlozoneSmartTransition->hgGlozoneTimeBlock->defaultHgGlo;
         $previousHgGlo = $hgGlozoneSmartTransition->hgGlozoneTimeBlock->previousSequentialTimeBlock->defaultHgGlo;
 
-        $hueLightsData = $hueComponent->v1GetRequest('lights');
+        // Get light data from HA
+        $hueLightsData = [];
+        if ($this->_haComponent) {
+            try {
+                $states = $this->_haComponent->getStates();
+                foreach ($states as $state) {
+                    if (strpos($state['entity_id'], 'light.') === 0) {
+                        // Convert HA state to Hue-like format for compatibility
+                        $hueLightsData[$state['entity_id']] = [
+                            'state' => [
+                                'on' => $state['state'] === 'on',
+                                'reachable' => $state['state'] !== 'unavailable',
+                                'bri' => isset($state['attributes']['brightness']) ? $state['attributes']['brightness'] : 0,
+                                'ct' => isset($state['attributes']['color_temp']) ? $state['attributes']['color_temp'] : null,
+                                'xy' => isset($state['attributes']['xy_color']) ? $state['attributes']['xy_color'] : null,
+                                'colormode' => isset($state['attributes']['color_mode']) ? $state['attributes']['color_mode'] : 'ct'
+                            ]
+                        ];
+                    }
+                }
+            } catch (\Exception $e) {
+                Yii::error('Failed to get HA states: ' . $e->getMessage(), __METHOD__);
+            }
+        }
 
         //pull all bulbs in scene
         $previousHgGLoDevices = HgGloDeviceLight::find()->where(['hg_hub_id'=>$this->_hg_hub_id,'hg_device_group_id'=>$hgDeviceGroup->id,'hg_glo_id'=>$previousHgGlo->id])->all();
@@ -324,8 +354,15 @@ class HgEngineComponent extends Component {
                     break;
                 }
                 //Check if any lights in the existing group are on
-                $group = $hueComponent->v1GetRequest("groups/{$hgDeviceGroup->hue_id}");
-                if ($group['state']['any_on'] === TRUE) { //lights are on!
+                $anyOn = false;
+                // For HA, check if any lights in the group are on
+                foreach ($hueLightsData as $lightData) {
+                    if ($lightData['state']['on']) {
+                        $anyOn = true;
+                        break;
+                    }
+                }
+                if ($anyOn) { //lights are on!
                     Yii::info('__SMARTTRANSITION_CYCLE_ON__: Lights are ON: '.$hgDeviceGroup->display_name,__METHOD__);
                     Yii::info('__SMARTTRANSITION_CYCLE_ON__: Previous Glo Name: '.$previousHgGlo->display_name,__METHOD__);
 
@@ -348,8 +385,15 @@ class HgEngineComponent extends Component {
                 break;
             case HgGlozoneTimeBlock::SMARTTRANSITION_IF_ON:
                 //Check if any lights in the existing group are on
-                $group = $hueComponent->v1GetRequest("groups/{$hgDeviceGroup->hue_id}");
-                if ($group['state']['any_on'] === TRUE) { //lights are on!
+                $anyOn = false;
+                // For HA, check if any lights in the group are on
+                foreach ($hueLightsData as $lightData) {
+                    if ($lightData['state']['on']) {
+                        $anyOn = true;
+                        break;
+                    }
+                }
+                if ($anyOn) { //lights are on!
                     Yii::info('__SMARTTRANSITION_IF_ON__: Lights are ON: '.$hgDeviceGroup->display_name,__METHOD__);
                     Yii::info('__SMARTTRANSITION_IF_ON__: Executing: '.$hgDeviceGroup->display_name,__METHOD__);
 
@@ -373,42 +417,50 @@ class HgEngineComponent extends Component {
 
     public function executeTurnGloOn(HgGlozoneSmartTransition $hgGlozoneSmartTransition)
     {
-        $hueComponent = $this->_hgHub->getHueComponent();
         $hgDeviceGroup = $hgGlozoneSmartTransition->hgDeviceGroup; //Current room
         $hgGlo = $hgGlozoneSmartTransition->hgGlozoneTimeBlock->defaultHgGlo;
+        
+        // Calculate transition time in seconds for HA
+        $transitionTime = $hgGlozoneSmartTransition->hgGlozoneTimeBlock->smartTransition_duration_ms / 1000;
 
-        if ($hgGlo->isOffGlo) {
-            $hueComponent->v1PutRequest("groups/{$hgDeviceGroup->hue_id}/action",[
-                'on'=>false,
-                'transitiontime'=>$hgGlozoneSmartTransition->hgGlozoneTimeBlock->smartTransition_duration_ms/100
-            ]);
+        if (!$this->_haComponent) {
+            Yii::error('No Home Assistant component available', __METHOD__);
+            return false;
+        }
 
+        // Get all light entities for this device group
+        $lightEntityIds = [];
+        $hgDeviceLights = HgDeviceLight::find()
+            ->where(['hg_device_group_id' => $hgDeviceGroup->id])
+            ->all();
+            
+        foreach ($hgDeviceLights as $deviceLight) {
+            if ($deviceLight->ha_device_id) {
+                // Get light entities for this device
+                $entities = $this->_haComponent->getDeviceLightEntities($deviceLight->ha_device_id);
+                $lightEntityIds = array_merge($lightEntityIds, $entities);
+            }
+        }
+
+        if (empty($lightEntityIds)) {
+            Yii::warning('No light entities found for room: ' . $hgDeviceGroup->display_name, __METHOD__);
+            return false;
+        }
+
+        try {
+            if ($hgGlo->isOffGlo) {
+                // Turn off lights
+                $this->_haComponent->turnOffLights($lightEntityIds, $transitionTime);
+            } else {
+                // Turn on lights with glo settings
+                $this->_haComponent->turnOnLightsWithGlo($lightEntityIds, $hgGlo, $transitionTime);
+                Yii::info('Turned on lights with glo: ' . $hgGlo->display_name, __METHOD__);
+            }
             return true;
+        } catch (\Exception $e) {
+            Yii::error('Failed to control lights: ' . $e->getMessage(), __METHOD__);
+            return false;
         }
-
-        Yii::info('Searching for hue_scene_id. hg_hub_id:'.$this->_hg_hub_id.', hg_device_group_id:'.$hgDeviceGroup->id.', hg_glo_id:'.$hgGlo->id,__METHOD__);
-
-        //the new glo scene id
-        $hue_scene_id = HgGloDeviceGroup::find()
-            ->where([
-                'hg_hub_id'=>$this->_hg_hub_id,
-                'hg_device_group_id'=>$hgDeviceGroup->id,
-                'hg_glo_id'=>$hgGlo->id
-            ])
-            ->one()
-            ->hue_scene_id;
-
-        if (!$hue_scene_id) {
-            throw new HueSceneDoesNotExistInRoomException('Unable to find hue scene id for room: '.$hgDeviceGroup->display_name);
-        } else {
-            Yii::info('Found hue scene id: '.$hue_scene_id);
-        }
-
-        $hueComponent->v1PutRequest("groups/{$hgDeviceGroup->hue_id}/action",[
-            'scene'=>$hue_scene_id,
-            'transitiontime'=>$hgGlozoneSmartTransition->hgGlozoneTimeBlock->smartTransition_duration_ms/100
-        ]);
-
     }
 
     /**
