@@ -3,16 +3,14 @@ namespace app\widgets;
 
 use hoaaah\sbadmin2\widgets\Menu as BaseMenu;
 use yii\helpers\Url;
-use app\helpers\IngressHelper;
 
 /**
- * Custom Menu widget that fixes URL generation for Home Assistant ingress mode
- * and keeps accordions always expanded
+ * Custom Menu widget that keeps accordions always expanded and fixes URL generation
  */
 class Menu extends BaseMenu
 {
     /**
-     * Override to use IngressHelper for URL generation
+     * Override to fix URL generation for ingress mode
      */
     protected function renderItem($item){
         if($this->setVisibility($item) === false) return '';
@@ -25,8 +23,8 @@ class Menu extends BaseMenu
 
         if($item['type'] === 'menu')
         {
-            // generate link using IngressHelper
-            $url = IngressHelper::createUrl($item['url']);
+            // generate link - use relative URL
+            $url = Url::to($item['url']);
             $label = $item['label'];
             $icon = $item['icon'] ?? $this->iconDefault;
             $linkOptions = '';
@@ -47,12 +45,12 @@ class Menu extends BaseMenu
     }
     
     /**
-     * Override to use IngressHelper for submenu URLs
+     * Override to fix URL generation for submenu items
      */
     protected function renderSubItem($item){
         $subMenuClass = $this->subMenuLinkClass;
-        // Use IngressHelper for URL generation
-        $url = IngressHelper::createUrl($item['url']);
+        // Use relative URL
+        $url = Url::to($item['url']);
         $icon = $item['icon'] ?? $this->iconDefault;
         $label = $item['label'];
         $linkOptions = '';

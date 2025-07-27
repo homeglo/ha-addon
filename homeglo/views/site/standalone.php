@@ -61,7 +61,7 @@ $this->title = 'HomeGlo';
                     
                     <?php if (IngressHelper::hasHomeAssistantConnection()): ?>
                         <div class="mb-3">
-                            <?= Html::beginForm(IngressHelper::createUrl(['site/sync-home-assistant']), 'post'); ?>
+                            <?= Html::beginForm(['site/sync-home-assistant'], 'post'); ?>
                                 <?= Html::submitButton(
                                     '<i class="fas fa-sync"></i> Sync from Home Assistant',
                                     ['class' => 'btn btn-secondary btn-block']

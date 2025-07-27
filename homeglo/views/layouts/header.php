@@ -1,5 +1,6 @@
 <?php
 use yii\helpers\Html;
+use yii\helpers\Url;
 use app\helpers\AddonHelper;
 use app\helpers\IngressHelper;
 
@@ -67,14 +68,14 @@ use app\helpers\IngressHelper;
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="<?= IngressHelper::createUrl(['/site/enter-home', 'id' => 2]) ?>">
+                <a class="dropdown-item" href="<?= Url::to(['/site/enter-home', 'id' => 2]) ?>">
                     <i class="fas fa-home fa-sm fa-fw mr-2 text-gray-400"></i>
                     Home Dashboard
                 </a>
                 
                 <?php if ($displayMode !== 'standalone'): ?>
                 <div class="dropdown-divider"></div>
-                <?= Html::beginForm(IngressHelper::createUrl(['/api/ha/sync/all']), 'post'); ?>
+                <?= Html::beginForm(['/api/ha/sync/all'], 'post'); ?>
                     <?= Html::submitButton(
                         '<i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i> Sync from Home Assistant',
                         ['class' => 'dropdown-item', 'encode' => false]

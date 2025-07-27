@@ -16,14 +16,14 @@ use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 // use app\models\LoginForm; // REMOVED: No longer needed for local setup
 use app\models\ContactForm;
 use app\helpers\IngressHelper;
+use app\controllers\BaseController;
 
-class SiteController extends Controller
+class SiteController extends BaseController
 {
     public function init()
     {
@@ -126,7 +126,7 @@ class SiteController extends Controller
             Yii::$app->session->setFlash('error', 'Sync failed: ' . $e->getMessage());
         }
         
-        return $this->redirect(IngressHelper::createUrl(['/site/index']));
+        return $this->redirect(['/site/index']);
     }
 
     public function actionDashboard($hg_home_id)
