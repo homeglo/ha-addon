@@ -50,7 +50,7 @@ if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a h
 
 
     $sideBarItems = [
-            [
+           /* [
                 'label' => $home_record->display_name,
                 'url' => ['/site/enter-home','id'=>$home_record['id']], //  Array format of Url to, will be not used if have an items
                 'icon' => 'fas fa-fw fa-home', // optional, default to "fa fa-circle-o
@@ -64,7 +64,7 @@ if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a h
                 'url' => ['/hg-home/update','id'=>$home_record['id']], //  Array format of Url to, will be not used if have an items
                 'icon' => 'fas fa-fw fa-cog', // optional, default to "fa fa-circle-o
                 'visible' => true, // optional, default to true
-            ],
+            ],*/
             // REMOVED: Sync Hue Hub Data - not needed for Home Assistant integration
             [
                 'type' => 'divider'
@@ -87,14 +87,7 @@ if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a h
                     'label' => 'Logic',
                     'icon'=>'fa fa-brain',
                     'url' => ['/hg-hub-action-template'], //  Array format of Url to, will be not used if have an items
-                ],
-                [
-                    'label' => 'Hubs',
-                    'icon' => 'fa fa-square', // optional, default to "fa fa-circle-o
-                    'visible' => true, // optional, default to true
-                    // 'subMenuTitle' => 'Menu 3 Item', // optional only when have submenutitle, if not exist will not have subMenuTitle
-                    'url'=>['/hg-hub']
-                ],
+                ]
                 [
                     'type'=>'divider'
                 ],

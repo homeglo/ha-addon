@@ -11,4 +11,11 @@ docker run --rm -it --name builder --privileged \
   --aarch64 \
   -i homeglo-aarch64 \
   -d local
+  
+  
+docker run --rm -it \
+-e HA_TOKEN= \
+-e HA_WEBSOCKET_URL=ws://homeassistant.local:8123/api/websocket \
+-p 80:80 \
+local/homeglo-aarch64:latest
 ```

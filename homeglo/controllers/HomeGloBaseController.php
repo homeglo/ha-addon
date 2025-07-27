@@ -55,7 +55,7 @@ class HomeGloBaseController extends Controller
     {
         error_log("HomeGloBaseController::beforeAction - Controller: " . $this->id . ", Action: " . $this->action->id);
         error_log("HomeGloBaseController::beforeAction - Current URI: " . Yii::$app->request->url);
-        
+
         if ($home_record = Yii::$app->session->get('home_record',false)) {
             error_log("HomeGloBaseController::beforeAction - Found home_record in session: " . $home_record->id);
             $this->home_record = HgHome::findOne($home_record->id);
@@ -67,34 +67,6 @@ class HomeGloBaseController extends Controller
                 $this->home_record = $defaultHome;
                 Yii::$app->session->set('home_record', $defaultHome);
                 error_log("HomeGloBaseController::beforeAction - Set default home in session");
-            } else {
-                error_log("HomeGloBaseController::beforeAction - Default home (ID 2) not found!");
-                Yii::$app->session->setFlash('error','Default home (ID 2) not found!');
-            }
-        }
-
-        if ($home_hubs = Yii::$app->session->get('home_hubs',false)) {
-            error_log("HomeGloBaseController::beforeAction - Found home_hubs in session");
-            $this->home_hubs = HgHub::find()->where(['hg_home_id'=>$this->home_record['id']])->all();
-
-            foreach ($this->home_hubs as $h) {
-                $this->home_hub_ids[] = $h['id'];
-            }
-        } else {
-            error_log("HomeGloBaseController::beforeAction - No home_hubs in session, loading from DB");
-            // Load hubs from database
-            if ($this->home_record) {
-                $this->home_hubs = HgHub::find()->where(['hg_home_id'=>$this->home_record['id']])->all();
-                foreach ($this->home_hubs as $h) {
-                    $this->home_hub_ids[] = $h['id'];
-                }
-                if (count($this->home_hubs) > 0) {
-                    Yii::$app->session->set('home_hubs', $this->home_hubs);
-                    error_log("HomeGloBaseController::beforeAction - Loaded " . count($this->home_hubs) . " hubs from DB and set in session");
-                } else {
-                    error_log("HomeGloBaseController::beforeAction - No hubs found in DB for home " . $this->home_record['id']);
-                    Yii::$app->session->setFlash('error','No hubs available!');
-                }
             }
         }
 
