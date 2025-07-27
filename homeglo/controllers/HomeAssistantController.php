@@ -9,16 +9,16 @@ use app\models\HgHub;
 use app\models\HgDeviceGroup;
 use app\models\HgDeviceLight;
 use Yii;
+use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\controllers\BaseController;
 
 /**
  * Home Assistant Controller
  * 
  * Provides web-based endpoints for Home Assistant synchronization
  */
-class HomeAssistantController extends BaseController
+class HomeAssistantController extends Controller
 {
     /**
      * {@inheritdoc}

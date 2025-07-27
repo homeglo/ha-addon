@@ -11,10 +11,10 @@ use app\models\HgHub;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\web\Controller;
 use yii\filters\VerbFilter;
-use app\controllers\BaseController;
 
-class HomeGloBaseController extends BaseController
+class HomeGloBaseController extends Controller
 {
     /**
      * @var array
