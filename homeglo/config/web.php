@@ -70,7 +70,7 @@ $config = [
                 [
                     'class' => 'yii\log\FileTarget',
                     'logFile' => 'php://stderr',
-                    'levels' => ['error', 'warning'],
+                    'levels' => ['error', 'warning', 'info'],
                     'logVars' => [],
                     'enableRotation' => false,
                 ],
