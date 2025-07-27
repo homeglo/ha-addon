@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use app\helpers\IngressHelper;
 
 /** @var yii\web\View $this */
 /** @var app\models\HgGlozoneTimeBlock $model */
@@ -11,7 +12,17 @@ use yii\widgets\ActiveForm;
 
 <div class="hg-glozone-time-block-form col-md-3">
 
-    <?php $form = \yii\bootstrap4\ActiveForm::begin(); ?>
+    <?php 
+    $formConfig = [];
+    if (!$model->isNewRecord) {
+        // For update, specify the action URL with ingress support
+        $formConfig['action'] = IngressHelper::createUrl(['hg-glozone-time-block/update', 'id' => $model->id]);
+    } else {
+        // For create, specify the action URL with ingress support
+        $formConfig['action'] = IngressHelper::createUrl(['hg-glozone-time-block/create', 'hg_glozone_id' => $hgGlozone->id ?? $model->hg_glozone_id]);
+    }
+    $form = \yii\bootstrap4\ActiveForm::begin($formConfig); 
+    ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
