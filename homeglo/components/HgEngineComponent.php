@@ -317,15 +317,34 @@ class HgEngineComponent extends Component {
         $hgGlo = $hgGlozoneSmartTransition->hgGlozoneTimeBlock->defaultHgGlo;
         $previousHgGlo = $hgGlozoneSmartTransition->hgGlozoneTimeBlock->previousSequentialTimeBlock->defaultHgGlo;
 
-        // Get light data from HA
+        // Get light data from HA for this specific device group
         $hueLightsData = [];
         if ($this->_haComponent) {
             try {
+                // First get all device lights for this group
+                $hgDeviceLights = HgDeviceLight::find()
+                    ->where(['primary_hg_device_group_id' => $hgDeviceGroup->id])
+                    ->all();
+                
+                // Collect all HA entity IDs for this group
+                $groupEntityIds = [];
+                foreach ($hgDeviceLights as $deviceLight) {
+                    if ($deviceLight->ha_device_id) {
+                        $entities = $this->_haComponent->getDeviceLightEntities($deviceLight->ha_device_id);
+                        foreach ($entities as $entityId) {
+                            $groupEntityIds[$entityId] = $deviceLight->id; // Map entity to device light
+                        }
+                    }
+                }
+                
+                // Now get states only for these entities
                 $states = $this->_haComponent->getStates();
                 foreach ($states as $state) {
-                    if (strpos($state['entity_id'], 'light.') === 0) {
+                    if (isset($groupEntityIds[$state['entity_id']])) {
                         // Convert HA state to Hue-like format for compatibility
-                        $hueLightsData[$state['entity_id']] = [
+                        // Use the device light ID as the key to maintain compatibility with existing logic
+                        $deviceLightId = $groupEntityIds[$state['entity_id']];
+                        $hueLightsData[$deviceLightId] = [
                             'state' => [
                                 'on' => $state['state'] === 'on',
                                 'reachable' => $state['state'] !== 'unavailable',
@@ -333,7 +352,8 @@ class HgEngineComponent extends Component {
                                 'ct' => isset($state['attributes']['color_temp']) ? $state['attributes']['color_temp'] : null,
                                 'xy' => isset($state['attributes']['xy_color']) ? $state['attributes']['xy_color'] : null,
                                 'colormode' => isset($state['attributes']['color_mode']) ? $state['attributes']['color_mode'] : 'ct'
-                            ]
+                            ],
+                            'entity_id' => $state['entity_id'] // Keep entity ID for reference
                         ];
                     }
                 }
@@ -431,7 +451,7 @@ class HgEngineComponent extends Component {
         // Get all light entities for this device group
         $lightEntityIds = [];
         $hgDeviceLights = HgDeviceLight::find()
-            ->where(['hg_device_group_id' => $hgDeviceGroup->id])
+            ->where(['primary_hg_device_group_id' => $hgDeviceGroup->id])
             ->all();
             
         foreach ($hgDeviceLights as $deviceLight) {
@@ -476,10 +496,11 @@ class HgEngineComponent extends Component {
         $trueCount = 0;
         $resultData=[];
 
-        foreach ($hueLightsData as $hue_id => $light_data) {
+        foreach ($hueLightsData as $device_light_id => $light_data) {
             if ($light_data['state']['on'] && $light_data['state']['reachable']) { //if light is on
                 foreach ($previousHgGLoDevices as $hgGloDeviceLight) { //loop through the lights we have in the db
-                    if ($hgGloDeviceLight->hgDeviceLight->isBulb && $hgGloDeviceLight->hgDeviceLight->hue_id == $hue_id) { //if they are the same light
+                    // For HA, compare by device light ID instead of hue_id
+                    if ($hgGloDeviceLight->hgDeviceLight->isBulb && $hgGloDeviceLight->hgDeviceLight->id == $device_light_id) { //if they are the same light
                         $totalCount++;
                         //check for ct match
                         if ( ($light_data['state']['colormode'] == 'ct')) {
