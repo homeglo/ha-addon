@@ -42,4 +42,16 @@ require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
 $config = require __DIR__ . '/../config/web.php';
 
 $app = new yii\web\Application($config);
+
+$app->on(yii\base\Application::EVENT_BEFORE_REQUEST, function ($event) {
+    // Manually set pathInfo from REQUEST_URI
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    $requestUri = strtok($requestUri, '?'); // Remove query string
+    $requestUri = ltrim($requestUri, '/');
+    
+    if (!empty($requestUri) && $requestUri !== 'index.php') {
+        Yii::$app->request->setPathInfo($requestUri);
+    }
+});
+
 $app->run();
