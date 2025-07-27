@@ -48,8 +48,6 @@ class GlozoneBaseController extends HomeGloBaseController
             $this->hgGlozone = HgGlozone::findOne($hg_glozone_id);
 
             Yii::$app->getView()->params['breadcrumbs'][] = $this->hgGlozone->display_name;
-        } else {
-            Yii::$app->session->setFlash('error','No glozone specified!');
         }
 
 

@@ -5,7 +5,7 @@ use app\helpers\IngressHelper;
 /* @var $this yii\web\View */
 /* @var $mode string */
 
-$this->title = 'HomeGlo - Standalone Mode';
+$this->title = 'HomeGlo';
 ?>
 
 <div class="container-fluid">
@@ -25,42 +25,48 @@ $this->title = 'HomeGlo - Standalone Mode';
                 <div class="card-body">
                     <h5>Welcome to HomeGlo</h5>
                     
+                    <?php if ($flash = Yii::$app->session->getFlash('success')): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> <?= Html::encode($flash) ?>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($flash = Yii::$app->session->getFlash('error')): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> <?= Html::encode($flash) ?>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if (IngressHelper::hasHomeAssistantConnection()): ?>
                         <div class="alert alert-success">
                             <i class="fas fa-check-circle"></i> 
                             <strong>Home Assistant Connection Available</strong><br>
                             You can sync devices from Home Assistant.
                         </div>
+                    <?php endif; ?>
                         
+                    <div class="mb-3">
+                        <?= Html::a(
+                            '<i class="fas fa-home"></i> Enter Home Dashboard',
+                            ['hg-glo/index', 'hg_glozone_id' => 2],
+                            ['class' => 'btn btn-primary btn-block']
+                        ) ?>
+                    </div>
+                    
+                    <?php if (IngressHelper::hasHomeAssistantConnection()): ?>
                         <div class="mb-3">
-                            <?= Html::a(
-                                '<i class="fas fa-home"></i> Enter Home Dashboard',
-                                ['/site/enter-home', 'id' => 2],
-                                ['class' => 'btn btn-primary btn-block']
-                            ) ?>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <?= Html::beginForm(['/api/ha/sync/all'], 'post'); ?>
+                            <?= Html::beginForm(IngressHelper::createUrl(['site/sync-home-assistant']), 'post'); ?>
                                 <?= Html::submitButton(
                                     '<i class="fas fa-sync"></i> Sync from Home Assistant',
                                     ['class' => 'btn btn-secondary btn-block']
                                 ); ?>
                             <?= Html::endForm(); ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> 
-                            <strong>Standalone Mode</strong><br>
-                            Running without Home Assistant connection.
-                        </div>
-                        
-                        <div class="mb-3">
-                            <?= Html::a(
-                                '<i class="fas fa-home"></i> Enter Home Dashboard',
-                                ['/site/enter-home', 'id' => 2],
-                                ['class' => 'btn btn-primary btn-block']
-                            ) ?>
                         </div>
                     <?php endif; ?>
                     

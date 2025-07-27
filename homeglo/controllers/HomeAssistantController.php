@@ -29,9 +29,9 @@ class HomeAssistantController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'sync-devices' => ['GET'],
-                    'sync-location' => ['GET'],
-                    'sync-all' => ['GET'],
+                    'sync-devices' => ['POST'],
+                    'sync-location' => ['POST'],
+                    'sync-all' => ['POST'],
                 ],
             ],
         ];

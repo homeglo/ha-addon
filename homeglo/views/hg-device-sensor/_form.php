@@ -10,10 +10,6 @@ use yii\widgets\ActiveForm;
 
         <?php $form = \yii\bootstrap4\ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'hg_hub_id')->textInput(['disabled'=>true]) ?>
-
-        <?= $form->field($model, 'hue_id')->textInput(['disabled'=>true]) ?>
-
         <?= $form->field($model, 'display_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'hg_device_group_id')->

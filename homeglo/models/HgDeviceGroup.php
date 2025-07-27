@@ -56,7 +56,7 @@ class HgDeviceGroup extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['hg_hub_id','hg_device_group_type_id','hg_glozone_id','room_invoke_order'], 'integer'],
+            [['hg_hub_id','hg_device_group_type_id','hg_glozone_id','room_invoke_order','is_room'], 'integer'],
             [['ha_device_id'], 'string', 'max' => 255],
             [['room_invoke_order'],'default','value'=>0],
             [['display_name'], 'string', 'max' => 255],

@@ -21,6 +21,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 // use app\models\LoginForm; // REMOVED: No longer needed for local setup
 use app\models\ContactForm;
+use app\helpers\IngressHelper;
 
 class SiteController extends Controller
 {
@@ -90,13 +91,8 @@ class SiteController extends Controller
             $hgGlozone->save();
         }
         
-        // If in standalone mode without ingress, show standalone page
-        if ($displayMode === 'standalone' || $displayMode === 'standalone-ha') {
-            return $this->render('standalone', ['mode' => $displayMode]);
-        }
-        
-        // Redirect to home 2
-        return $this->redirect(['site/enter-home', 'id' => 2]);
+        // Always show the standalone page as the default view
+        return $this->render('standalone', ['mode' => $displayMode]);
     }
 
     public function actionEnterHome($id)
@@ -107,6 +103,29 @@ class SiteController extends Controller
         Yii::$app->session->set('home_record',$home);
 
         return $this->redirect(['/hg-home/update','id'=>$id]);
+    }
+    
+    /**
+     * Sync with Home Assistant and redirect back to index with status
+     */
+    public function actionSyncHomeAssistant()
+    {
+        try {
+            $service = new \app\services\HomeAssistantSyncService();
+            $results = $service->syncAll();
+            
+            if ($results['success']) {
+                Yii::$app->session->setFlash('success', 'Home Assistant sync completed successfully! ' . 
+                    'Lights: ' . ($results['lights']['created'] ?? 0) . ' created, ' . ($results['lights']['updated'] ?? 0) . ' updated. ' .
+                    'Areas: ' . ($results['areas']['created'] ?? 0) . ' created, ' . ($results['areas']['updated'] ?? 0) . ' updated.');
+            } else {
+                Yii::$app->session->setFlash('error', 'Sync completed with errors. Please check the logs.');
+            }
+        } catch (\Exception $e) {
+            Yii::$app->session->setFlash('error', 'Sync failed: ' . $e->getMessage());
+        }
+        
+        return $this->redirect(IngressHelper::createUrl(['index']));
     }
 
     public function actionDashboard($hg_home_id)

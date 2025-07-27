@@ -494,6 +494,7 @@ class HomeAssistantSyncService extends Component
             $deviceGroup->display_name = $areaInfo['name'] ?? 'Unknown Area';
             $deviceGroup->ha_device_id = $areaId;
             $deviceGroup->hg_glozone_id = $glozone->id;
+            $deviceGroup->is_room = 1;
             $deviceGroup->hg_device_group_type_id = self::DEFAULT_DEVICE_GROUP_TYPE_ID;
             $deviceGroup->room_invoke_order = 0;
             

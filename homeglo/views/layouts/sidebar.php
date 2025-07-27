@@ -1,5 +1,5 @@
 <?php
-use hoaaah\sbadmin2\widgets\Menu;
+use app\widgets\Menu;
 
 if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a home
 
@@ -64,11 +64,11 @@ if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a h
                 'url' => ['/hg-home/update','id'=>$home_record['id']], //  Array format of Url to, will be not used if have an items
                 'icon' => 'fas fa-fw fa-cog', // optional, default to "fa fa-circle-o
                 'visible' => true, // optional, default to true
-            ],*/
+            ],
             // REMOVED: Sync Hue Hub Data - not needed for Home Assistant integration
             [
                 'type' => 'divider'
-            ]
+            ]*/
         ];
 
     $sideBarItems = \yii\helpers\ArrayHelper::merge(
@@ -81,13 +81,13 @@ if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a h
                 [
                     'label' => 'Lights',
                     'icon'=>'fa fa-lightbulb',
-                    'url' => ['/hg-device-light'], //  Array format of Url to, will be not used if have an items
+                    'url' => ['/hg-device-light/index'], //  Array format of Url to, will be not used if have an items
                 ],
                 [
                     'label' => 'Logic',
                     'icon'=>'fa fa-brain',
-                    'url' => ['/hg-hub-action-template'], //  Array format of Url to, will be not used if have an items
-                ]
+                    'url' => ['/hg-hub-action-template/index'], //  Array format of Url to, will be not used if have an items
+                ],
                 [
                     'type'=>'divider'
                 ],
@@ -164,20 +164,12 @@ if ($home_record = Yii::$app->session->get('home_record')) { //we are inside a h
 }
 
 
-//so i don't accidentally do shit on prod
-if (!YII_ENV_PROD) {
-    $ulClass = 'bg-gradient-danger';
-    $name = 'LightLab';
-}
-else {
-    $ulClass = 'bg-gradient-primary';
-    $name = 'HomeGlo';
-}
+$name = 'HomeGlo';
 
 
 echo Menu::widget([
     'options' => [
-        'ulClass' => "navbar-nav $ulClass sidebar sidebar-dark accordion",
+        'ulClass' => "navbar-nav bg-gradient-primary sidebar sidebar-dark accordion",
         'ulId' => "accordionSidebar"
     ], //  optional
     'brand' => [

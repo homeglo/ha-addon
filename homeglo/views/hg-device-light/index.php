@@ -27,11 +27,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'hue_id',
-            [
-                'filter' => Html::activeDropDownList($searchModel, 'hg_hub_id', $available_hubs),
-                'attribute'=>'hgHub.display_name',
-            ],
             'display_name',
             'serial',
             [

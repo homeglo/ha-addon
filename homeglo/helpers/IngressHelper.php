@@ -90,9 +90,7 @@ class IngressHelper
     public static function hasHomeAssistantConnection()
     {
         // Check if we have supervisor token
-        return !empty(getenv('SUPERVISOR_TOKEN')) || 
-               (defined('HA_TOKEN') && !empty(constant('HA_TOKEN'))) ||
-               file_exists('/data/ha-config.php');
+        return getenv('SUPERVISOR_TOKEN') || (getenv('HA_TOKEN'));
     }
     
     /**
