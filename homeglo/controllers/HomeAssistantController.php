@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\HgGlozone;
 use app\services\HomeAssistantSyncService;
 use app\models\HgHome;
 use app\models\HgHub;
@@ -258,7 +259,7 @@ class HomeAssistantController extends Controller
             
             // Get all device groups for home 2
             $deviceGroups = HgDeviceGroup::find()
-                ->where(['hg_home_id' => 2])
+                ->where(['hg_glozone_id' => $home2->hgGlozones])
                 ->all();
             
             // Get all lights

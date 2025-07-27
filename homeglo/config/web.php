@@ -88,6 +88,7 @@ $config = [
                 'api/ha/sync/location' => 'home-assistant/sync-location',
                 'api/ha/sync/all' => 'home-assistant/sync-all',
                 'api/ha/status' => 'home-assistant/status',
+                'api/ha/debug' => 'home-assistant/debug',
                 
                 // Standard controller/action routes
                 '<controller:\w+>' => '<controller>/index',

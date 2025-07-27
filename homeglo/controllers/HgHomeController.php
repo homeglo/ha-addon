@@ -110,12 +110,6 @@ class HgHomeController extends Controller
                 $hgGlozone->display_name = $model->display_name.' Glozone';
                 $hgGlozone->save();
 
-                //create the first hub
-                $hgHub = new HgHub();
-                $hgHub->display_name = $model->display_name.' (Hub 1)';
-                $hgHub->hg_home_id = $model->id;
-                $hgHub->save();
-
                 return $this->redirect(['/hg-home']);
             }
         } else {

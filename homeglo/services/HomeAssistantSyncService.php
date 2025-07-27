@@ -498,16 +498,16 @@ class HomeAssistantSyncService extends Component
             $deviceGroup->room_invoke_order = 0;
             
             // Store comprehensive area metadata
-            $deviceGroup->metadata = [
+            $deviceGroup->metadata = json_encode([
                 'ha_area_id' => $areaId,
                 'ha_name' => $areaInfo['name'] ?? null,
-                'ha_aliases' => $areaInfo['aliases'] ?? [],
+                'ha_aliases' => $areaInfo['aliases'] ?? null,
                 'ha_picture' => $areaInfo['picture'] ?? null,
                 'synced_from_ha' => true,
                 'sync_timestamp' => time(),
                 'sync_version' => '2.0',
                 'sync_type' => 'area_from_device'
-            ];
+            ]);
 
             if ($deviceGroup->save()) {
                 $this->log("  ✓ Created area device group: {$deviceGroup->display_name}");
@@ -559,7 +559,7 @@ class HomeAssistantSyncService extends Component
         }
         
         // Store comprehensive device metadata
-        $deviceSensor->metadata = [
+        $deviceSensor->metadata = json_encode([
             'ha_device_id' => $device['id'],
             'ha_manufacturer' => $device['manufacturer'] ?? null,
             'ha_model' => $device['model'] ?? null,
@@ -576,7 +576,7 @@ class HomeAssistantSyncService extends Component
             'synced_from_ha' => true,
             'sync_timestamp' => time(),
             'sync_version' => '2.0'
-        ];
+        ]);
 
         if ($deviceSensor->save()) {
             $this->log("  ✓ Created device sensor (ID: {$deviceSensor->id})");
@@ -626,7 +626,7 @@ class HomeAssistantSyncService extends Component
         }
         
         // Store comprehensive device metadata
-        $deviceLight->metadata = [
+        $deviceLight->metadata = json_encode([
             'ha_device_id' => $device['id'],
             'ha_manufacturer' => $device['manufacturer'] ?? null,
             'ha_model' => $device['model'] ?? null,
@@ -643,7 +643,7 @@ class HomeAssistantSyncService extends Component
             'synced_from_ha' => true,
             'sync_timestamp' => time(),
             'sync_version' => '2.0'
-        ];
+        ]);
 
         if ($deviceLight->save()) {
             $this->log("  ✓ Created device light (ID: {$deviceLight->id})");
@@ -704,7 +704,7 @@ class HomeAssistantSyncService extends Component
         }
 
         // Always update metadata to keep it current
-        $existingDevice->metadata = [
+        $existingDevice->metadata = json_encode([
             'ha_device_id' => $device['id'],
             'ha_manufacturer' => $device['manufacturer'] ?? null,
             'ha_model' => $device['model'] ?? null,
@@ -721,7 +721,7 @@ class HomeAssistantSyncService extends Component
             'synced_from_ha' => true,
             'sync_timestamp' => time(),
             'sync_version' => '2.0'
-        ];
+        ]);
 
         if ($updated || !empty($changes)) {
             if ($this->dryRun) {
@@ -794,7 +794,7 @@ class HomeAssistantSyncService extends Component
         }
 
         // Always update metadata to keep it current
-        $existingDevice->metadata = [
+        $existingDevice->metadata =json_encode( [
             'ha_device_id' => $device['id'],
             'ha_manufacturer' => $device['manufacturer'] ?? null,
             'ha_model' => $device['model'] ?? null,
@@ -811,7 +811,7 @@ class HomeAssistantSyncService extends Component
             'synced_from_ha' => true,
             'sync_timestamp' => time(),
             'sync_version' => '2.0'
-        ];
+        ]);
 
         if ($updated || !empty($changes)) {
             if ($this->dryRun) {

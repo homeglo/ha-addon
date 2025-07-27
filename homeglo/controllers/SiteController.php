@@ -74,54 +74,25 @@ class SiteController extends Controller
     {
         // Check display mode
         $displayMode = \app\helpers\IngressHelper::getDisplayMode();
+
+        if (!HgHome::findOne(2)) {
+            $hgHome = new HgHome();
+            $hgHome->display_name = 'HomeAssistant Home';
+            $hgHome->lat = 33.2;
+            $hgHome->lng = -75.2;
+            $hgHome->save();
+
+            $defGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
+            $hgGlozone = new HgGlozone();
+            $hgGlozone->attributes = $defGlozone->attributes;
+            $hgGlozone->hg_home_id = 2;
+            $hgGlozone->display_name = $hgHome->display_name.' Glozone';
+            $hgGlozone->save();
+        }
         
         // If in standalone mode without ingress, show standalone page
         if ($displayMode === 'standalone' || $displayMode === 'standalone-ha') {
             return $this->render('standalone', ['mode' => $displayMode]);
-        }
-        
-        // Check if default home (ID 2) exists, create it if not
-        $defaultHome = HgHome::findOne(2);
-        
-        if (!$defaultHome) {
-            error_log("SiteController::actionIndex - Creating default home (ID 2)");
-            
-            // Get template home if it exists
-            $templateHome = HgHome::findOne(1);
-            
-            $defaultHome = new HgHome();
-            $defaultHome->id = 2;
-            $defaultHome->display_name = "My Home";
-            $defaultHome->name = "my_home";
-            $defaultHome->lat = 0.0;
-            $defaultHome->lng = 0.0;
-            
-            // Copy values from template if it exists
-            if ($templateHome) {
-                $defaultHome->lat = $templateHome->lat ?: 0.0;
-                $defaultHome->lng = $templateHome->lng ?: 0.0;
-                $defaultHome->hg_version_id = $templateHome->hg_version_id;
-                $defaultHome->hg_status_id = $templateHome->hg_status_id;
-            }
-            
-            if ($defaultHome->save(false)) {
-                error_log("SiteController::actionIndex - Default home created successfully");
-
-                // If no template glozone, use system default
-                $templateGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
-
-                if ($templateGlozone) {
-                    $defGlozone = HgGlozone::findOne(HgGlozone::HG_DEFAULT_GLOZONE);
-                    $hgGlozone = new HgGlozone();
-                    $hgGlozone->attributes = $defGlozone->attributes;
-                    $hgGlozone->hg_home_id = $defaultHome->id;
-                    $hgGlozone->display_name = $defaultHome->display_name.' Glozone';
-                    $hgGlozone->save();
-                    error_log("SiteController::actionIndex - Default glozone created");
-                }
-            } else {
-                error_log("SiteController::actionIndex - Failed to create default home: " . json_encode($defaultHome->getErrors()));
-            }
         }
         
         // Redirect to home 2

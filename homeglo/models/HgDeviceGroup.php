@@ -257,7 +257,7 @@ class HgDeviceGroup extends \yii\db\ActiveRecord
 
         if ($insert) {
             //sync timeblocks on insert, create smart transitions for this room
-            HgGlozoneTimeBlock::syncTimeBlocks($this->hgHub->hgHome->getDefaultGlozone());
+            HgGlozoneTimeBlock::syncTimeBlocks($this->hgGlozone->hgHome->getDefaultGlozone());
         }
 
         if (!$insert) {
